@@ -42,7 +42,8 @@ namespace PLUME.Viewer
                 {
                     var gameObjectGuid = Guid.Parse(createEvt.gameObjectIdentifier.GameObjectId);
 
-                    if (!_currentItems.ContainsKey(gameObjectGuid))
+                    if (!_currentItems.ContainsKey(gameObjectGuid) &&
+                        !_createdOrUpdatedItems.ContainsKey(gameObjectGuid))
                     {
                         var item = new HierarchyTreeItemData(gameObjectGuid);
                         _createdOrUpdatedItems[gameObjectGuid] = item;
@@ -117,14 +118,15 @@ namespace PLUME.Viewer
                         }
                     }
 
-                    if (parentGameObjectGuid != Guid.Empty &&
-                        !_createdOrUpdatedItems.TryGetValue(parentGameObjectGuid, out var parentItem))
+                    if (parentGameObjectGuid != Guid.Empty)
                     {
-                        if (!_currentItems.TryGetValue(parentGameObjectGuid, out parentItem))
+                        if (!_createdOrUpdatedItems.TryGetValue(parentGameObjectGuid, out var parentItem))
                         {
-                            Debug.Log("created missing parent");
-                            parentItem = new HierarchyTreeItemData(gameObjectGuid);
-                            _createdOrUpdatedItems[parentGameObjectGuid] = parentItem;
+                            if (!_currentItems.TryGetValue(parentGameObjectGuid, out parentItem))
+                            {
+                                parentItem = new HierarchyTreeItemData(gameObjectGuid);
+                                _createdOrUpdatedItems[parentGameObjectGuid] = parentItem;
+                            }
                         }
                     }
 
@@ -133,37 +135,35 @@ namespace PLUME.Viewer
                     _createdOrUpdatedItems[gameObjectGuid] = item;
                     break;
                 }
+
                 case HierarchyForceRebuild:
                 {
                     _destroyedItems.Clear();
                     _createdOrUpdatedItems.Clear();
 
+                    ClearHierarchyTree();
+
                     var playerCtx = player.GetMainPlayerContext();
-                    var gameObjectsGuids = playerCtx.GetAllGameObjects()
-                        .Select(go => playerCtx.GetRecordIdentifier(go.GetInstanceID()))
-                        .ToList();
+                    var gameObjects = playerCtx.GetAllGameObjects();
 
-                    var existingItems = new Dictionary<Guid, HierarchyTreeItemData>();
-                    var createdItems = new List<Guid>(gameObjectsGuids);
-
-                    foreach (var goGuid in gameObjectsGuids)
+                    foreach (var go in gameObjects)
                     {
-                        if (!_currentItems.ContainsKey(goGuid)) continue;
-                        existingItems.TryAdd(goGuid, _currentItems[goGuid]);
-                        createdItems.Remove(goGuid);
-                    }
+                        var guid = playerCtx.GetRecordIdentifier(go.GetInstanceID());
+                        var parentGuid = Guid.Empty;
 
-                    var deletedItems = _currentItems.Except(existingItems).ToList();
+                        if (go.transform.parent != null)
+                        {
+                            parentGuid = playerCtx.GetRecordIdentifier(go.transform.parent.GetInstanceID());
+                        }
 
-                    foreach (var (guid, item) in deletedItems)
-                    {
-                        _destroyedItems.Add(guid);
-                    }
-
-                    foreach (var createdGoGuid in createdItems)
-                    {
-                        var item = new HierarchyTreeItemData(createdGoGuid);
-                        _createdOrUpdatedItems[createdGoGuid] = item;
+                        var item = new HierarchyTreeItemData(guid)
+                        {
+                            ParentGameObjectGuid = parentGuid,
+                            SiblingIndex = go.transform.GetSiblingIndex(),
+                            Enabled = go.activeSelf,
+                            Name = go.name
+                        };
+                        _createdOrUpdatedItems[guid] = item;
                     }
 
                     break;
@@ -180,6 +180,12 @@ namespace PLUME.Viewer
 
             _lastFrameUpdate = Time.frameCount;
             UpdateHierarchyTree();
+        }
+
+        private void ClearHierarchyTree()
+        {
+            _hierarchyTree.Clear();
+            _hierarchyTree.viewController.RebuildTree();
         }
 
         private void UpdateHierarchyTree()
@@ -285,15 +291,14 @@ namespace PLUME.Viewer
                 }
             }
 
-            _destroyedItems.Clear();
-            _createdOrUpdatedItems.Clear();
-
             if (rebuildTree)
             {
                 controller.RebuildTree();
                 _hierarchyTree.RefreshItems();
             }
 
+            _destroyedItems.Clear();
+            _createdOrUpdatedItems.Clear();
             Profiler.EndSample();
         }
     }
