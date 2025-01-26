@@ -242,8 +242,8 @@ namespace PLUME.Viewer.Player
             var t = GetOrCreateTransformByIdentifier(transformIdentifier);
             var parent = GetOrCreateTransformByIdentifier(parentTransformIdentifier);
             t.SetParent(parent);
-            updatedHierarchy?.Invoke(new HierarchyUpdateGameObjectParentEvent(transformIdentifier.Gameobject,
-                parentTransformIdentifier.Gameobject, t.GetSiblingIndex()));
+            updatedHierarchy?.Invoke(new HierarchyUpdateGameObjectParentEvent(transformIdentifier.GameObject,
+                parentTransformIdentifier.GameObject, t.GetSiblingIndex()));
         }
 
         public void SetName(GameObjectIdentifier id, string name)
@@ -258,7 +258,7 @@ namespace PLUME.Viewer.Player
             var t = GetOrCreateTransformByIdentifier(transformIdentifier);
             t.SetSiblingIndex(siblingIndex);
             updatedHierarchy?.Invoke(
-                new HierarchyUpdateGameObjectSiblingIndexEvent(transformIdentifier.Gameobject, siblingIndex));
+                new HierarchyUpdateGameObjectSiblingIndexEvent(transformIdentifier.GameObject, siblingIndex));
         }
 
         public void SetActive(GameObjectIdentifier id, bool active)
@@ -356,7 +356,7 @@ namespace PLUME.Viewer.Player
         public Transform GetOrCreateTransformByIdentifier(ComponentIdentifier id)
         {
             var transformGuid = Guid.Parse(id.Guid);
-            var gameObjectGuid = Guid.Parse(id.Gameobject.Guid);
+            var gameObjectGuid = Guid.Parse(id.GameObject.Guid);
 
             if (transformGuid == Guid.Empty)
                 return null;
@@ -399,14 +399,14 @@ namespace PLUME.Viewer.Player
             _transformsByInstanceId[newTransform.GetInstanceID()] = newTransform;
             TryAddIdentifierCorrespondence(transformGuid, newTransform.GetInstanceID());
             TryAddIdentifierCorrespondence(gameObjectGuid, newGameObject.GetInstanceID());
-            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.Gameobject));
+            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.GameObject));
             return newTransform;
         }
 
         public RectTransform GetOrCreateRectTransformByIdentifier(ComponentIdentifier id)
         {
             var transformGuid = Guid.Parse(id.Guid);
-            var gameObjectGuid = Guid.Parse(id.Gameobject.Guid);
+            var gameObjectGuid = Guid.Parse(id.GameObject.Guid);
 
             if (transformGuid == Guid.Empty)
                 return null;
@@ -459,7 +459,7 @@ namespace PLUME.Viewer.Player
             _transformsByInstanceId[newTransform.GetInstanceID()] = newTransform;
             TryAddIdentifierCorrespondence(transformGuid, newTransform.GetInstanceID());
             TryAddIdentifierCorrespondence(gameObjectGuid, newGameObject.GetInstanceID());
-            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.Gameobject));
+            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.GameObject));
             return newTransform;
         }
 
@@ -488,7 +488,7 @@ namespace PLUME.Viewer.Player
                 return _componentByInstanceId.GetValueOrDefault(replayComponentInstanceId.Value) as T;
             }
 
-            var go = GetOrCreateGameObjectByIdentifier(id.Gameobject);
+            var go = GetOrCreateGameObjectByIdentifier(id.GameObject);
 
             var component = go.AddComponent<T>();
 

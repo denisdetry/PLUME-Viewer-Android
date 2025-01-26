@@ -16,7 +16,7 @@ namespace PLUME.Viewer.Player.Module.Unity
                 }
                 case TransformDestroy transformDestroy:
                 {
-                    ctx.TryDestroyGameObjectByIdentifier(transformDestroy.Component.Gameobject);
+                    ctx.TryDestroyGameObjectByIdentifier(transformDestroy.Component.GameObject);
                     break;
                 }
                 case TransformUpdate transformUpdate:

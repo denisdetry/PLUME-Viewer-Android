@@ -21,10 +21,10 @@ namespace PLUME
             if (string.IsNullOrEmpty(identifier.Guid) || Guid.Parse(identifier.Guid) == Guid.Empty)
                 return null;
 
-            if (string.IsNullOrEmpty(identifier.Path))
+            if (string.IsNullOrEmpty(identifier.AssetBundlePath))
                 return null;
 
-            var splitAssetIdentifier = identifier.Path.Split(":", 4);
+            var splitAssetIdentifier = identifier.AssetBundlePath.Split(":", 4);
 
             var assetSource = splitAssetIdentifier[0];
             var assetTypeName = splitAssetIdentifier[1];

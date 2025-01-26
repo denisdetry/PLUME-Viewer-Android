@@ -14,19 +14,19 @@ namespace PLUME.Viewer.Player.Module.XRITK
             {
                 case XRBaseInteractorCreate xrBaseInteractorCreate:
                 {
-                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractorCreate.Component.Gameobject);
+                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractorCreate.Component.GameObject);
                     Debug.Log($"XR Base Interactor : {go.name} has been created");
                     break;
                 }
                 case XRBaseInteractorDestroy xrBaseInteractorDestroy:
                 {
-                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractorDestroy.Component.Gameobject);
+                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractorDestroy.Component.GameObject);
                     Debug.Log($"XR Base Interactor : {go.name} has been destroyed");
                     break;
                 }
                 case XRBaseInteractableUpdate xrBaseInteractorSetEnabled:
                 {
-                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractorSetEnabled.Component.Gameobject);
+                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractorSetEnabled.Component.GameObject);
                     string message;
                     if (xrBaseInteractorSetEnabled.Enabled)
                         message = "XR Base Interactor : {0} has been enabled";

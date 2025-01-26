@@ -20,7 +20,7 @@ namespace PLUME.Viewer.Player.Module.Unity
                 }
                 case RectTransformDestroy rectTransformDestroy:
                 {
-                    ctx.TryDestroyGameObjectByIdentifier(rectTransformDestroy.Component.Gameobject);
+                    ctx.TryDestroyGameObjectByIdentifier(rectTransformDestroy.Component.GameObject);
                     break;
                 }
                 case RectTransformUpdate rectTransformUpdate:

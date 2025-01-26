@@ -67,20 +67,20 @@ namespace PLUME.Viewer.Analysis.Interaction
                 if (parameters.InteractionType == InteractionType.Hover &&
                     sample.Payload is XRBaseInteractableHoverEnter hoverEnter)
                 {
-                    interactorIdentifier = hoverEnter.Interactor.Gameobject;
-                    interactableIdentifier = hoverEnter.Component.Gameobject;
+                    interactorIdentifier = hoverEnter.Interactor.GameObject;
+                    interactableIdentifier = hoverEnter.Component.GameObject;
                 }
                 else if (parameters.InteractionType == InteractionType.Select &&
                          sample.Payload is XRBaseInteractableSelectEnter selectEnter)
                 {
-                    interactorIdentifier = selectEnter.Interactor.Gameobject;
-                    interactableIdentifier = selectEnter.Component.Gameobject;
+                    interactorIdentifier = selectEnter.Interactor.GameObject;
+                    interactableIdentifier = selectEnter.Component.GameObject;
                 }
                 else if (parameters.InteractionType == InteractionType.Activate &&
                          sample.Payload is XRBaseInteractableActivateEnter activateEnter)
                 {
-                    interactorIdentifier = activateEnter.Interactor.Gameobject;
-                    interactableIdentifier = activateEnter.Component.Gameobject;
+                    interactorIdentifier = activateEnter.Interactor.GameObject;
+                    interactableIdentifier = activateEnter.Component.GameObject;
                 }
                 else
                 {

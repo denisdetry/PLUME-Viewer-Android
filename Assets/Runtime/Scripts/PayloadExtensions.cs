@@ -45,24 +45,6 @@ namespace PLUME
 {
     public static class PayloadExtensions
     {
-        public static GameObjectIdentifier ToIdentifierPayload(this GameObject go)
-        {
-            return new GameObjectIdentifier
-            {
-                Guid = go.GetHashCode().ToString(),
-                TransformGuid = go.transform.GetHashCode().ToString()
-            };
-        }
-
-        public static ComponentIdentifier ToIdentifierPayload(this Component component)
-        {
-            return new ComponentIdentifier
-            {
-                Guid = component.GetHashCode().ToString(),
-                Gameobject = component.gameObject.ToIdentifierPayload()
-            };
-        }
-
         public static Vector2 ToEngineType(this Sample.Common.Vector2 vec)
         {
             return new Vector2
