@@ -12,10 +12,10 @@ namespace PLUME.Viewer.Player.Module.Unity.URP
             switch (rawSample.Payload)
             {
                 case AdditionalCameraDataCreate camDataCreate:
-                    ctx.GetOrCreateComponentByIdentifier<UniversalAdditionalCameraData>(camDataCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<UniversalAdditionalCameraData>(camDataCreate.Component);
                     break;
                 case AdditionalCameraDataUpdate camDataUpdate:
-                    var camData = ctx.GetOrCreateComponentByIdentifier<UniversalAdditionalCameraData>(camDataUpdate.Id);
+                    var camData = ctx.GetOrCreateComponentByIdentifier<UniversalAdditionalCameraData>(camDataUpdate.Component);
                     camData.renderShadows = camDataUpdate.RenderShadows;
                     camData.requiresDepthOption = camDataUpdate.RequiresDepthOption.ToEngineType();
                     camData.requiresColorOption = camDataUpdate.RequiresColorOption.ToEngineType();
@@ -23,7 +23,7 @@ namespace PLUME.Viewer.Player.Module.Unity.URP
                     camData.requiresDepthTexture = camDataUpdate.RequiresDepthTexture;
                     camData.requiresColorTexture = camDataUpdate.RequiresColorTexture;
                     camData.volumeLayerMask = camDataUpdate.VolumeLayerMask;
-                    camData.volumeTrigger = ctx.GetOrCreateTransformByIdentifier(camDataUpdate.VolumeTriggerId);
+                    camData.volumeTrigger = ctx.GetOrCreateTransformByIdentifier(camDataUpdate.VolumeTrigger);
                     camData.renderPostProcessing = camDataUpdate.RenderPostProcessing;
                     camData.antialiasing = camDataUpdate.Antialiasing.ToEngineType();
                     camData.antialiasingQuality = camDataUpdate.AntialiasingQuality.ToEngineType();

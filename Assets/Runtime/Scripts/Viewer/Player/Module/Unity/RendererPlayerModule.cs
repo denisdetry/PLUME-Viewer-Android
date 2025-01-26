@@ -11,11 +11,11 @@ namespace PLUME.Viewer.Player.Module.Unity
         {
             if (rawSample.Payload is RendererUpdate rendererUpdate)
             {
-                var r = ctx.GetOrCreateComponentByIdentifier<Renderer>(rendererUpdate.Id);
+                var r = ctx.GetOrCreateComponentByIdentifier<Renderer>(rendererUpdate.Component);
 
                 if (r == null)
                 {
-                    Debug.LogWarning($"Renderer with id {rendererUpdate.Id} not found");
+                    Debug.LogWarning($"Renderer with id {rendererUpdate.Component} not found");
                     return;
                 }
                 

@@ -12,17 +12,17 @@ namespace PLUME.Viewer.Player.Module.Unity.UI
             {
                 case TMPTextCreate tmpTextCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<TextMeshProUGUI>(tmpTextCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<TextMeshProUGUI>(tmpTextCreate.Component);
                     break;
                 }
                 case TMPTextDestroy tmpTextDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(tmpTextDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(tmpTextDestroy.Component);
                     break;
                 }
                 case TMPTextUpdate tmpTextUpdate:
                 {
-                    var tmpText = ctx.GetOrCreateComponentByIdentifier<TextMeshProUGUI>(tmpTextUpdate.Id);
+                    var tmpText = ctx.GetOrCreateComponentByIdentifier<TextMeshProUGUI>(tmpTextUpdate.Component);
 
                     if (tmpTextUpdate.HasText)
                     {
@@ -109,10 +109,10 @@ namespace PLUME.Viewer.Player.Module.Unity.UI
                         tmpText.margin = tmpTextUpdate.Margin.ToEngineType();
                     }
 
-                    if (tmpTextUpdate.FontId != null)
+                    if (tmpTextUpdate.Font != null)
                     {
-                        tmpText.font = ctx.GetOrDefaultAssetByIdentifier<TMP_FontAsset>(tmpTextUpdate.FontId);
-                        ctx.TryAddAssetIdentifierCorrespondence(tmpTextUpdate.FontId, tmpText.font);
+                        tmpText.font = ctx.GetOrDefaultAssetByIdentifier<TMP_FontAsset>(tmpTextUpdate.Font);
+                        ctx.TryAddAssetIdentifierCorrespondence(tmpTextUpdate.Font, tmpText.font);
                     }
 
                     break;

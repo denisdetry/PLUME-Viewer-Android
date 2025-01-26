@@ -44,25 +44,25 @@ namespace PLUME.Viewer.Player
             _recordAssetBundle = recordAssetBundle;
             _scene = scene;
         }
-        
+
         internal static async UniTask<PlayerContext> CreateMainPlayerContext(RecordAssetBundle assets)
         {
             const string mainPlayerContextName = "MainPlayerContext";
-            
+
             if (Contexts.Select(ctx => ctx._name).Contains(mainPlayerContextName))
             {
                 throw new Exception("MainPlayerContext already exists");
             }
-            
+
             var loadSceneParameters = new LoadSceneParameters(LoadSceneMode.Additive);
             await SceneManager.LoadSceneAsync(mainPlayerContextName, loadSceneParameters);
             var scene = SceneManager.GetSceneByName(mainPlayerContextName);
 
             if (!scene.IsValid())
                 throw new Exception("Failed to load MainPlayerContext scene");
-            
+
             SceneManager.SetActiveScene(scene);
-            
+
             var ctx = new PlayerContext(mainPlayerContextName, assets, scene);
             Contexts.Add(ctx);
             return ctx;
@@ -74,15 +74,15 @@ namespace PLUME.Viewer.Player
             {
                 throw new Exception("The name MainPlayerContext is reserved");
             }
-            
+
             if (Contexts.Select(ctx => ctx._name).Contains(name))
             {
                 throw new Exception($"A context with this name already exists: {name}");
             }
-            
+
             var scene = SceneManager.CreateScene(name);
             SceneManager.SetActiveScene(scene);
-            
+
             // Apply default lighting settings
             // RenderSettings.skybox = BuiltinAssets.Instance.defaultSkybox;
             // Lightmapping.lightingSettings = Resources.Load<LightingSettings>("Default Lighting Settings");
@@ -242,8 +242,8 @@ namespace PLUME.Viewer.Player
             var t = GetOrCreateTransformByIdentifier(transformIdentifier);
             var parent = GetOrCreateTransformByIdentifier(parentTransformIdentifier);
             t.SetParent(parent);
-            updatedHierarchy?.Invoke(new HierarchyUpdateGameObjectParentEvent(transformIdentifier.ParentId,
-                parentTransformIdentifier.ParentId, t.GetSiblingIndex()));
+            updatedHierarchy?.Invoke(new HierarchyUpdateGameObjectParentEvent(transformIdentifier.Gameobject,
+                parentTransformIdentifier.Gameobject, t.GetSiblingIndex()));
         }
 
         public void SetName(GameObjectIdentifier id, string name)
@@ -252,13 +252,13 @@ namespace PLUME.Viewer.Player
             go.name = name;
             updatedHierarchy?.Invoke(new HierarchyUpdateGameObjectNameEvent(id, name));
         }
-        
+
         public void SetSiblingIndex(ComponentIdentifier transformIdentifier, int siblingIndex)
         {
             var t = GetOrCreateTransformByIdentifier(transformIdentifier);
             t.SetSiblingIndex(siblingIndex);
             updatedHierarchy?.Invoke(
-                new HierarchyUpdateGameObjectSiblingIndexEvent(transformIdentifier.ParentId, siblingIndex));
+                new HierarchyUpdateGameObjectSiblingIndexEvent(transformIdentifier.Gameobject, siblingIndex));
         }
 
         public void SetActive(GameObjectIdentifier id, bool active)
@@ -302,9 +302,9 @@ namespace PLUME.Viewer.Player
 
         public GameObject GetOrCreateGameObjectByIdentifier(GameObjectIdentifier id)
         {
-            var gameObjectGuid = Guid.Parse(id.GameObjectId);
-            var transformGuid = Guid.Parse(id.TransformId);
-            
+            var gameObjectGuid = Guid.Parse(id.Guid);
+            var transformGuid = Guid.Parse(id.TransformGuid);
+
             if (transformGuid == Guid.Empty)
                 return null;
 
@@ -355,9 +355,9 @@ namespace PLUME.Viewer.Player
 
         public Transform GetOrCreateTransformByIdentifier(ComponentIdentifier id)
         {
-            var transformGuid = Guid.Parse(id.ComponentId);
-            var gameObjectGuid = Guid.Parse(id.ParentId.GameObjectId);
-            
+            var transformGuid = Guid.Parse(id.Guid);
+            var gameObjectGuid = Guid.Parse(id.Gameobject.Guid);
+
             if (transformGuid == Guid.Empty)
                 return null;
 
@@ -399,15 +399,15 @@ namespace PLUME.Viewer.Player
             _transformsByInstanceId[newTransform.GetInstanceID()] = newTransform;
             TryAddIdentifierCorrespondence(transformGuid, newTransform.GetInstanceID());
             TryAddIdentifierCorrespondence(gameObjectGuid, newGameObject.GetInstanceID());
-            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.ParentId));
+            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.Gameobject));
             return newTransform;
         }
 
         public RectTransform GetOrCreateRectTransformByIdentifier(ComponentIdentifier id)
         {
-            var transformGuid = Guid.Parse(id.ComponentId);
-            var gameObjectGuid = Guid.Parse(id.ParentId.GameObjectId);
-            
+            var transformGuid = Guid.Parse(id.Guid);
+            var gameObjectGuid = Guid.Parse(id.Gameobject.Guid);
+
             if (transformGuid == Guid.Empty)
                 return null;
 
@@ -452,14 +452,14 @@ namespace PLUME.Viewer.Player
                     return rectTransform;
                 }
             }
-            
+
             var newGameObject = new GameObject();
             var newTransform = newGameObject.AddComponent<RectTransform>();
             _gameObjectsByInstanceId[newGameObject.GetInstanceID()] = newGameObject;
             _transformsByInstanceId[newTransform.GetInstanceID()] = newTransform;
             TryAddIdentifierCorrespondence(transformGuid, newTransform.GetInstanceID());
             TryAddIdentifierCorrespondence(gameObjectGuid, newGameObject.GetInstanceID());
-            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.ParentId));
+            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.Gameobject));
             return newTransform;
         }
 
@@ -470,8 +470,8 @@ namespace PLUME.Viewer.Player
 
         public T GetOrCreateComponentByIdentifier<T>(ComponentIdentifier id) where T : Component
         {
-            var componentGuid = Guid.Parse(id.ComponentId);
-            
+            var componentGuid = Guid.Parse(id.Guid);
+
             if (componentGuid == Guid.Empty)
                 return null;
 
@@ -488,7 +488,7 @@ namespace PLUME.Viewer.Player
                 return _componentByInstanceId.GetValueOrDefault(replayComponentInstanceId.Value) as T;
             }
 
-            var go = GetOrCreateGameObjectByIdentifier(id.ParentId);
+            var go = GetOrCreateGameObjectByIdentifier(id.Gameobject);
 
             var component = go.AddComponent<T>();
 
@@ -508,9 +508,9 @@ namespace PLUME.Viewer.Player
 
         public bool TryDestroyGameObjectByIdentifier(GameObjectIdentifier id)
         {
-            var gameObjectGuid = Guid.Parse(id.GameObjectId);
-            var transformGuid = Guid.Parse(id.TransformId);
-            
+            var gameObjectGuid = Guid.Parse(id.Guid);
+            var transformGuid = Guid.Parse(id.TransformGuid);
+
             var goReplayInstanceId = GetReplayInstanceId(gameObjectGuid);
             var transformReplayInstanceId = GetReplayInstanceId(transformGuid);
 
@@ -530,7 +530,7 @@ namespace PLUME.Viewer.Player
             if (go != null)
             {
                 updatedHierarchy?.Invoke(new HierarchyDestroyGameObjectEvent(id));
-                
+
                 _gameObjectsByInstanceId.Remove(go.GetInstanceID());
                 _gameObjectsTagByInstanceId.Remove(go.GetInstanceID());
                 _transformsByInstanceId.Remove(go.transform.GetInstanceID());
@@ -556,7 +556,7 @@ namespace PLUME.Viewer.Player
                         RemoveIdentifierCorrespondence(GetRecordIdentifier(childComponentInstanceId));
                     }
                 }
-                
+
                 Object.DestroyImmediate(go);
             }
 
@@ -567,7 +567,7 @@ namespace PLUME.Viewer.Player
 
         public bool TryDestroyComponentByIdentifier(ComponentIdentifier identifier)
         {
-            var guid = Guid.Parse(identifier.ComponentId);
+            var guid = Guid.Parse(identifier.Guid);
             var componentReplayInstanceId = GetReplayInstanceId(guid);
 
             if (componentReplayInstanceId.HasValue)
@@ -626,7 +626,7 @@ namespace PLUME.Viewer.Player
         {
             if (recordIdentifier == Guid.Empty)
                 return false;
-            
+
             return _idMap.TryAdd(recordIdentifier, replayInstanceId) &&
                    _invertIdMap.TryAdd(replayInstanceId, recordIdentifier);
         }
@@ -636,8 +636,8 @@ namespace PLUME.Viewer.Player
             if (recordIdentifier == null || replayAsset == null)
                 return false;
 
-            var guid = Guid.Parse(recordIdentifier.Id);
-            
+            var guid = Guid.Parse(recordIdentifier.Guid);
+
             return _idMap.TryAdd(guid, replayAsset.GetInstanceID()) &&
                    _invertIdMap.TryAdd(replayAsset.GetInstanceID(), guid);
         }

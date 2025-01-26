@@ -49,8 +49,8 @@ namespace PLUME
         {
             return new GameObjectIdentifier
             {
-                GameObjectId = go.GetHashCode().ToString(),
-                TransformId = go.transform.GetHashCode().ToString()
+                Guid = go.GetHashCode().ToString(),
+                TransformGuid = go.transform.GetHashCode().ToString()
             };
         }
 
@@ -58,8 +58,8 @@ namespace PLUME
         {
             return new ComponentIdentifier
             {
-                ComponentId = component.GetHashCode().ToString(),
-                ParentId = component.gameObject.ToIdentifierPayload()
+                Guid = component.GetHashCode().ToString(),
+                Gameobject = component.gameObject.ToIdentifierPayload()
             };
         }
 

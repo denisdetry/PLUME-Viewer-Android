@@ -12,33 +12,33 @@ namespace PLUME.Viewer.Player.Module.Unity
             {
                 case TerrainCreate terrainCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<Terrain>(terrainCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<Terrain>(terrainCreate.Component);
                     break;
                 }
                 case TerrainDestroy terrainDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(terrainDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(terrainDestroy.Component);
                     break;
                 }
                 case TerrainUpdate terrainUpdate:
                 {
-                    var terrain = ctx.GetOrCreateComponentByIdentifier<Terrain>(terrainUpdate.Id);
+                    var terrain = ctx.GetOrCreateComponentByIdentifier<Terrain>(terrainUpdate.Component);
 
                     if (terrainUpdate.HasEnabled)
                     {
                         terrain.enabled = terrainUpdate.Enabled;
                     }
 
-                    if (terrainUpdate.TerrainDataId != null)
+                    if (terrainUpdate.TerrainData != null)
                     {
-                        var terrainData = ctx.GetOrDefaultAssetByIdentifier<TerrainData>(terrainUpdate.TerrainDataId);
+                        var terrainData = ctx.GetOrDefaultAssetByIdentifier<TerrainData>(terrainUpdate.TerrainData);
                         terrain.terrainData = terrainData;
                     }
 
-                    if (terrainUpdate.MaterialTemplateId != null)
+                    if (terrainUpdate.MaterialTemplate != null)
                     {
                         var materialTemplate =
-                            ctx.GetOrDefaultAssetByIdentifier<Material>(terrainUpdate.MaterialTemplateId);
+                            ctx.GetOrDefaultAssetByIdentifier<Material>(terrainUpdate.MaterialTemplate);
                         terrain.materialTemplate = materialTemplate;
                     }
 

@@ -44,10 +44,10 @@ namespace PLUME.Viewer.Player.Module.Unity
                         ctx.SetGameObjectTag(gameObjectUpdate.Id, gameObjectUpdate.Tag);
                     }
 
-                    if (gameObjectUpdate.HasSceneId)
-                    {
-                        // TODO handle multiple scenes
-                    }
+                    // if (gameObjectUpdate.HasSceneId)
+                    // {
+                    //     // TODO handle multiple scenes
+                    // }
 
                     break;
                 }

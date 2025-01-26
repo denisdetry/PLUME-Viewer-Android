@@ -12,22 +12,22 @@ namespace PLUME.Viewer.Player.Module.Unity
             {
                 case MeshFilterCreate meshFilterCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<MeshFilter>(meshFilterCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<MeshFilter>(meshFilterCreate.Component);
                     break;
                 }
                 case MeshFilterDestroy meshFilterDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(meshFilterDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(meshFilterDestroy.Component);
                     break;
                 }
                 case MeshFilterUpdate meshFilterUpdate:
                 {
-                    var meshFilter = ctx.GetOrCreateComponentByIdentifier<MeshFilter>(meshFilterUpdate.Id);
+                    var meshFilter = ctx.GetOrCreateComponentByIdentifier<MeshFilter>(meshFilterUpdate.Component);
 
-                    if (meshFilterUpdate.MeshId != null)
+                    if (meshFilterUpdate.Mesh != null)
                     {
-                        meshFilter.sharedMesh = ctx.GetOrDefaultAssetByIdentifier<Mesh>(meshFilterUpdate.MeshId);
-                        ctx.TryAddAssetIdentifierCorrespondence(meshFilterUpdate.MeshId, meshFilter.sharedMesh);
+                        meshFilter.sharedMesh = ctx.GetOrDefaultAssetByIdentifier<Mesh>(meshFilterUpdate.Mesh);
+                        ctx.TryAddAssetIdentifierCorrespondence(meshFilterUpdate.Mesh, meshFilter.sharedMesh);
                     }
 
                     break;

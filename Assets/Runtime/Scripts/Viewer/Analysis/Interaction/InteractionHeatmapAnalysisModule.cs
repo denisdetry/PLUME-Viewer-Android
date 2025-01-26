@@ -67,20 +67,20 @@ namespace PLUME.Viewer.Analysis.Interaction
                 if (parameters.InteractionType == InteractionType.Hover &&
                     sample.Payload is XRBaseInteractableHoverEnter hoverEnter)
                 {
-                    interactorIdentifier = hoverEnter.InteractorCurrent.ParentId;
-                    interactableIdentifier = hoverEnter.Id.ParentId;
+                    interactorIdentifier = hoverEnter.Interactor.Gameobject;
+                    interactableIdentifier = hoverEnter.Component.Gameobject;
                 }
                 else if (parameters.InteractionType == InteractionType.Select &&
                          sample.Payload is XRBaseInteractableSelectEnter selectEnter)
                 {
-                    interactorIdentifier = selectEnter.InteractorCurrent.ParentId;
-                    interactableIdentifier = selectEnter.Id.ParentId;
+                    interactorIdentifier = selectEnter.Interactor.Gameobject;
+                    interactableIdentifier = selectEnter.Component.Gameobject;
                 }
                 else if (parameters.InteractionType == InteractionType.Activate &&
                          sample.Payload is XRBaseInteractableActivateEnter activateEnter)
                 {
-                    interactorIdentifier = activateEnter.InteractorCurrent.ParentId;
-                    interactableIdentifier = activateEnter.Id.ParentId;
+                    interactorIdentifier = activateEnter.Interactor.Gameobject;
+                    interactableIdentifier = activateEnter.Component.Gameobject;
                 }
                 else
                 {
@@ -90,8 +90,8 @@ namespace PLUME.Viewer.Analysis.Interaction
                 if (interactorIdentifier == null || interactableIdentifier == null)
                     continue;
 
-                var interactorGameObjectGuid = Guid.Parse(interactorIdentifier.GameObjectId);
-                var interactableGameObjectGuid = Guid.Parse(interactableIdentifier.GameObjectId);
+                var interactorGameObjectGuid = Guid.Parse(interactorIdentifier.Guid);
+                var interactableGameObjectGuid = Guid.Parse(interactableIdentifier.Guid);
 
                 if (!parameters.InteractorsIds.Contains(interactorGameObjectGuid)) continue;
 

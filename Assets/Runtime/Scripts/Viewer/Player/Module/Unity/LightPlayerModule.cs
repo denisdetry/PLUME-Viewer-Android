@@ -13,17 +13,17 @@ namespace PLUME.Viewer.Player.Module.Unity
             {
                 case LightCreate lightCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<Light>(lightCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<Light>(lightCreate.Component);
                     break;
                 }
                 case LightDestroy lightDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(lightDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(lightDestroy.Component);
                     break;
                 }
                 case LightUpdate lightUpdate:
                 {
-                    var replayLight = ctx.GetOrCreateComponentByIdentifier<Light>(lightUpdate.Id);
+                    var replayLight = ctx.GetOrCreateComponentByIdentifier<Light>(lightUpdate.Component);
 
                     if (lightUpdate.HasEnabled)
                     {
@@ -140,10 +140,10 @@ namespace PLUME.Viewer.Player.Module.Unity
                         replayLight.useViewFrustumForShadowCasterCull = lightUpdate.UseViewFrustumForShadowCasterCull;
                     }
 
-                    if (lightUpdate.CookieId != null)
+                    if (lightUpdate.Cookie != null)
                     {
-                        replayLight.cookie = ctx.GetOrDefaultAssetByIdentifier<Texture>(lightUpdate.CookieId);
-                        ctx.TryAddAssetIdentifierCorrespondence(lightUpdate.CookieId, replayLight.cookie);
+                        replayLight.cookie = ctx.GetOrDefaultAssetByIdentifier<Texture>(lightUpdate.Cookie);
+                        ctx.TryAddAssetIdentifierCorrespondence(lightUpdate.Cookie, replayLight.cookie);
                     }
 
                     if (lightUpdate.HasCookieSize)
@@ -151,10 +151,10 @@ namespace PLUME.Viewer.Player.Module.Unity
                         replayLight.cookieSize = lightUpdate.CookieSize;
                     }
 
-                    if (lightUpdate.FlareId != null)
+                    if (lightUpdate.Flare != null)
                     {
-                        replayLight.flare = ctx.GetOrDefaultAssetByIdentifier<Flare>(lightUpdate.FlareId);
-                        ctx.TryAddAssetIdentifierCorrespondence(lightUpdate.FlareId, replayLight.flare);
+                        replayLight.flare = ctx.GetOrDefaultAssetByIdentifier<Flare>(lightUpdate.Flare);
+                        ctx.TryAddAssetIdentifierCorrespondence(lightUpdate.Flare, replayLight.flare);
                     }
 
                     if (lightUpdate.HasUseBoundingSphereOverride)

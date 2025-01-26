@@ -12,17 +12,17 @@ namespace PLUME.Viewer.Player.Module.Unity.UI
             {
                 case CanvasScalerCreate canvasScalerCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<CanvasScaler>(canvasScalerCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<CanvasScaler>(canvasScalerCreate.Component);
                     break;
                 }
                 case CanvasScalerDestroy canvasScalerDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(canvasScalerDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(canvasScalerDestroy.Component);
                     break;
                 }
                 case CanvasScalerUpdate canvasScalerUpdate:
                 {
-                    var cs = ctx.GetOrCreateComponentByIdentifier<CanvasScaler>(canvasScalerUpdate.Id);
+                    var cs = ctx.GetOrCreateComponentByIdentifier<CanvasScaler>(canvasScalerUpdate.Component);
 
                     if (canvasScalerUpdate.HasUiScaleMode)
                         cs.uiScaleMode = canvasScalerUpdate.UiScaleMode.ToEngineType();

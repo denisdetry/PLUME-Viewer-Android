@@ -12,17 +12,17 @@ namespace PLUME.Viewer.Player.Module.Unity
             {
                 case LineRendererCreate lineRendererCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<LineRenderer>(lineRendererCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<LineRenderer>(lineRendererCreate.Component);
                     break;
                 }
                 case LineRendererDestroy lineRendererDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(lineRendererDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(lineRendererDestroy.Component);
                     break;
                 }
                 case LineRendererUpdate lineRendererUpdate:
                 {
-                    var lineRenderer = ctx.GetOrCreateComponentByIdentifier<LineRenderer>(lineRendererUpdate.Id);
+                    var lineRenderer = ctx.GetOrCreateComponentByIdentifier<LineRenderer>(lineRendererUpdate.Component);
 
                     if (lineRendererUpdate.HasLoop)
                         lineRenderer.loop = lineRendererUpdate.Loop;

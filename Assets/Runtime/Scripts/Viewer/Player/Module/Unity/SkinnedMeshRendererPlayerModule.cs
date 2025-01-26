@@ -13,23 +13,23 @@ namespace PLUME.Viewer.Player.Module.Unity
             {
                 case SkinnedMeshRendererCreate skinnedMeshRendererCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<SkinnedMeshRenderer>(skinnedMeshRendererCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<SkinnedMeshRenderer>(skinnedMeshRendererCreate.Component);
                     break;
                 }
                 case SkinnedMeshRendererDestroy skinnedMeshRendererDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(skinnedMeshRendererDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(skinnedMeshRendererDestroy.Component);
                     break;
                 }
                 case SkinnedMeshRendererUpdate skinnedMeshRendererUpdate:
                 {
                     var skinnedMeshRenderer =
-                        ctx.GetOrCreateComponentByIdentifier<SkinnedMeshRenderer>(skinnedMeshRendererUpdate.Id);
+                        ctx.GetOrCreateComponentByIdentifier<SkinnedMeshRenderer>(skinnedMeshRendererUpdate.Component);
 
-                    if (skinnedMeshRendererUpdate.RootBoneId != null)
+                    if (skinnedMeshRendererUpdate.RootBone != null)
                     {
                         skinnedMeshRenderer.rootBone =
-                            ctx.GetOrCreateTransformByIdentifier(skinnedMeshRendererUpdate.RootBoneId);
+                            ctx.GetOrCreateTransformByIdentifier(skinnedMeshRendererUpdate.RootBone);
                     }
 
                     if (skinnedMeshRendererUpdate.Bones != null)
@@ -39,11 +39,11 @@ namespace PLUME.Viewer.Player.Module.Unity
                             .ToArray();
                     }
 
-                    if (skinnedMeshRendererUpdate.MeshId != null)
+                    if (skinnedMeshRendererUpdate.Mesh != null)
                     {
                         skinnedMeshRenderer.sharedMesh =
-                            ctx.GetOrDefaultAssetByIdentifier<Mesh>(skinnedMeshRendererUpdate.MeshId);
-                        ctx.TryAddAssetIdentifierCorrespondence(skinnedMeshRendererUpdate.MeshId,
+                            ctx.GetOrDefaultAssetByIdentifier<Mesh>(skinnedMeshRendererUpdate.Mesh);
+                        ctx.TryAddAssetIdentifierCorrespondence(skinnedMeshRendererUpdate.Mesh,
                             skinnedMeshRenderer.sharedMesh);
                     }
 

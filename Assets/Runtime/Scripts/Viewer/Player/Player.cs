@@ -99,7 +99,7 @@ namespace PLUME.Viewer.Player
             {
                 GraphicsSettings.defaultRenderPipeline =
                     RecordAssetBundle.GetOrDefaultAssetByIdentifier<RenderPipelineAsset>(Record.graphicsSettings
-                        .DefaultRenderPipelineAssetId);
+                        .DefaultRenderPipelineAsset);
             };
 
             UniTask.WhenAll(recordLoadTask, assetBundleLoadTask).ContinueWith(() =>

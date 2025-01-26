@@ -12,17 +12,17 @@ namespace PLUME.Viewer.Player.Module.Unity.UI
             {
                 case CanvasCreate canvasCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<Canvas>(canvasCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<Canvas>(canvasCreate.Component);
                     break;
                 }
                 case CanvasDestroy canvasDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(canvasDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(canvasDestroy.Component);
                     break;
                 }
                 case CanvasUpdate canvasUpdate:
                 {
-                    var c = ctx.GetOrCreateComponentByIdentifier<Canvas>(canvasUpdate.Id);
+                    var c = ctx.GetOrCreateComponentByIdentifier<Canvas>(canvasUpdate.Component);
 
 
                     if (canvasUpdate.HasRenderMode)

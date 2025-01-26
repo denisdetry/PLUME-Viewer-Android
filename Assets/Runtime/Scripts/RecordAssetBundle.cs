@@ -18,7 +18,7 @@ namespace PLUME
 
         public T GetOrDefaultAssetByIdentifier<T>(AssetIdentifier identifier) where T : Object
         {
-            if (identifier.Id == "00000000000000000000000000000000")
+            if (string.IsNullOrEmpty(identifier.Guid) || Guid.Parse(identifier.Guid) == Guid.Empty)
                 return null;
 
             if (string.IsNullOrEmpty(identifier.Path))
