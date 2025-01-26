@@ -10,6 +10,7 @@ namespace PLUME.Viewer.Player
     {
         private readonly string _bundlePath;
         private AssetBundleCreateRequest _assetBundleCreateRequest;
+        private AssetBundleCreateRequest _sceneBundleCreateRequest;
 
         private LoadingStatus _loadingStatus;
 
@@ -33,22 +34,29 @@ namespace PLUME.Viewer.Player
             await UniTask.RunOnThreadPool(() => ZipFile.ExtractToDirectory(_bundlePath, tempDirectory));
             
             var assetBundlePath = Path.Combine(tempDirectory, "plume_assets");
+            var sceneBundlePath = Path.Combine(tempDirectory, "plume_scenes");
             
             var assetBundleName = Path.GetFileName(assetBundlePath);
+            var sceneBundleName = Path.GetFileName(sceneBundlePath);
             var assetBundle = AssetBundle.GetAllLoadedAssetBundles()
                 .FirstOrDefault(bundle => bundle.name == assetBundleName);
+            var sceneBundle = AssetBundle.GetAllLoadedAssetBundles()
+                .FirstOrDefault(bundle => bundle.name == sceneBundleName);
 
             if (assetBundle == null)
             {
                 _loadingStatus = LoadingStatus.Loading;
                 _assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(assetBundlePath);
+                _sceneBundleCreateRequest = AssetBundle.LoadFromFileAsync(sceneBundlePath);
                 await _assetBundleCreateRequest;
+                await _sceneBundleCreateRequest;
                 assetBundle = _assetBundleCreateRequest.assetBundle;
+                sceneBundle = _sceneBundleCreateRequest.assetBundle;
                 await assetBundle.LoadAllAssetsAsync();
                 _loadingStatus = LoadingStatus.Done;
             }
 
-            return new RecordAssetBundle(assetBundle);
+            return new RecordAssetBundle(assetBundle, sceneBundle);
         }
 
         public float GetLoadingProgress()
@@ -57,7 +65,7 @@ namespace PLUME.Viewer.Player
             {
                 LoadingStatus.Done => 1,
                 LoadingStatus.NotLoading => 0,
-                _ => _assetBundleCreateRequest.progress
+                _ => (_assetBundleCreateRequest.progress + _sceneBundleCreateRequest.progress) / 2
             };
         }
 

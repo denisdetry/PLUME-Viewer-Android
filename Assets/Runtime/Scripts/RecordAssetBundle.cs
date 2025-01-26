@@ -10,10 +10,12 @@ namespace PLUME
     public class RecordAssetBundle
     {
         private readonly AssetBundle _assetBundle;
+        private readonly AssetBundle _sceneBundle;
 
-        public RecordAssetBundle(AssetBundle assetBundle)
+        public RecordAssetBundle(AssetBundle assetBundle, AssetBundle sceneBundle)
         {
             _assetBundle = assetBundle;
+            _sceneBundle = sceneBundle;
         }
 
         public T GetOrDefaultAssetByIdentifier<T>(AssetIdentifier identifier) where T : Object

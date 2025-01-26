@@ -84,10 +84,10 @@ namespace PLUME.Viewer.Player
             PlayerModules = FindObjectsOfType<PlayerModule>();
             _bundleLoader = new BundleLoader(bundlePath);
 
-            var assetBundleLoadTask = _bundleLoader.LoadAsync().ContinueWith(async recordAssetBundle =>
+            var assetBundleLoadTask = _bundleLoader.LoadAsync().ContinueWith(recordAssetBundle =>
             {
                 RecordAssetBundle = recordAssetBundle;
-                _mainPlayerContext = await PlayerContext.CreateMainPlayerContext(recordAssetBundle);
+                _mainPlayerContext = PlayerContext.CreatePlayerContext(recordAssetBundle);
                 _mainPlayerContext.updatedHierarchy += mainContextUpdatedHierarchy;
             });
 
@@ -259,15 +259,13 @@ namespace PLUME.Viewer.Player
             return true;
         }
 
-        public bool StopPlaying()
+        public async UniTask StopPlaying()
         {
             _isPlaying = false;
             _currentTimeNanoseconds = 0;
 
             foreach (var playerModule in PlayerModules) playerModule.Reset();
             _mainPlayerContext.Reset();
-
-            return true;
         }
 
         public void JumpToTime(ulong time)
