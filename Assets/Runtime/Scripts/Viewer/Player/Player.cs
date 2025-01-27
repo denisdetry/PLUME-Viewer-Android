@@ -1,23 +1,23 @@
-﻿#if UNITY_STANDALONE_WIN
-using System.Windows.Forms;
-#endif
-using System;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Threading;
-using Cysharp.Threading.Tasks;
 using PLUME.Viewer.Analysis;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Application = UnityEngine.Application;
+#if UNITY_STANDALONE_WIN
+using Cysharp.Threading.Tasks;
+#endif
 
 namespace PLUME.Viewer.Player
 {
     // TODO: decouple the player from the record loading process
     [DisallowMultipleComponent]
-    public class Player : SingletonMonoBehaviour<Player>, IDisposable
+    public class Player : MonoBehaviour, IDisposable
     {
+        public static Player Instance { get; private set; }
+        
         public TypeRegistryProvider typeRegistryProvider;
 
         public bool loop;
@@ -66,7 +66,17 @@ namespace PLUME.Viewer.Player
 
         private new void Awake()
         {
-            base.Awake();
+            if (Instance != null && ReferenceEquals(Instance, this))
+            {
+                Debug.LogWarning("Player already exists. Removing new instance.");
+                Destroy(gameObject);
+            }
+            else
+            {
+                Instance = this;
+                transform.parent = null;
+                DontDestroyOnLoad(gameObject);
+            }
 
             var recordPath = GetRecordPath();
             var bundlePath = GetBundlePath(recordPath);
