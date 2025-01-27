@@ -529,6 +529,14 @@ namespace PLUME.Viewer.Player
         {
             var go = GetOrCreateGameObjectByIdentifier(id);
             var targetScene = GetOrCreateSceneByIdentifier(scene);
+            
+            // Sanity check to prevent error
+            if (go.transform.parent != null)
+            {
+                Debug.LogWarning($"Cannot move non-root GameObject {go.name} to scene {scene.Name}");
+                return;
+            }
+            
             SceneManager.MoveGameObjectToScene(go, targetScene);
         }
         
