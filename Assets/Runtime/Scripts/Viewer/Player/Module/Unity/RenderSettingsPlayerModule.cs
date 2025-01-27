@@ -130,16 +130,8 @@ namespace PLUME.Viewer.Player.Module.Unity
                     {
                         var skybox = ctx.GetOrDefaultAssetByIdentifier<Material>(settingsUpdate.Skybox);
                         RenderSettings.skybox = skybox;
-                        DynamicGI.UpdateEnvironment();
                     }
 
-                    var renderers = FindObjectsByType<Renderer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-                    
-                    foreach (var r in renderers)
-                    {
-                        r.UpdateGIMaterials();
-                    }
-                    
                     break;
                 }
             }
