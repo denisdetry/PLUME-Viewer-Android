@@ -42,12 +42,12 @@ namespace PLUME.Viewer.Player.Module.Unity
                     {
                         ctx.SetGameObjectTag(gameObjectUpdate.Id, gameObjectUpdate.Tag);
                     }
-
-                    // if (gameObjectUpdate.HasSceneId)
-                    // {
-                    //     // TODO handle multiple scenes
-                    // }
-
+                    
+                    if (gameObjectUpdate.Scene != null)
+                    {
+                        ctx.MoveGameObjectToScene(gameObjectUpdate.Id, gameObjectUpdate.Scene);
+                    }
+                    
                     break;
                 }
             }

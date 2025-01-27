@@ -281,64 +281,38 @@ namespace PLUME.Viewer.Player
 
             if (sceneGuid == Guid.Empty)
                 return default;
-
-            var sceneName = sceneId.Name + "-" + _contextGuid;
             
             if (_scenesByGuid.TryGetValue(sceneGuid, out var scene))
             {
                 return scene;
             }
             
-            if (string.IsNullOrEmpty(sceneId.AssetBundlePath))
+            try
             {
-                try
-                {
-                    Debug.Log($"Creating scene {sceneName} from scratch");
-                    scene = SceneManager.CreateScene(sceneName);
-                    _scenesByGuid[sceneGuid] = scene;
-                    return scene;
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"Failed to create scene {sceneName}: {e.Message}");
-                    return default;
-                }
-            }
-            else if (sceneId.AssetBundlePath == "DontDestroyOnLoad")
-            {
-                Debug.Log($"Creating scene {sceneName} from scratch");
+                // Ensure the scene name is unique to prevent error when unloading and loading the same scene (e.g. when going backward)
+                var sceneName = sceneId.Name + "-" + Guid.NewGuid();
                 scene = SceneManager.CreateScene(sceneName);
                 _scenesByGuid[sceneGuid] = scene;
                 return scene;
             }
-            else
+            catch (Exception ex)
             {
-                try
-                {
-                    Debug.Log($"Loading scene from asset bundle path {sceneId.AssetBundlePath}");
-                    SceneManager.LoadScene(sceneId.AssetBundlePath, LoadSceneMode.Additive);
-                    scene = SceneManager.GetSceneByPath(sceneId.AssetBundlePath);
-                    scene.name = sceneName;
-                    _scenesByGuid[sceneGuid] = scene;
-                    return scene;
-                }
-                catch (Exception e)
-                {
-                    Debug.LogWarning(
-                        $"Failed to load scene from asset bundle path {sceneId.AssetBundlePath}. Creating from scratch. Error: {e.Message}");
-                    
-                    try
-                    {
-                        scene = SceneManager.CreateScene(sceneName);
-                        _scenesByGuid[sceneGuid] = scene;
-                        return scene;
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.LogError($"Failed to create scene {sceneId.Name}: {ex.Message}");
-                        return default;
-                    }
-                }
+                Debug.LogError($"Failed to create scene {sceneId.Name}: {ex.Message}");
+                return default;
+            }
+        }
+        
+        public void DestroyScene(SceneIdentifier sceneId)
+        {
+            var sceneGuid = Guid.Parse(sceneId.Guid);
+
+            if (sceneGuid == Guid.Empty)
+                return;
+
+            if (_scenesByGuid.TryGetValue(sceneGuid, out var scene))
+            {
+                SceneManager.UnloadSceneAsync(scene);
+                _scenesByGuid.Remove(sceneGuid);
             }
         }
 
@@ -551,6 +525,13 @@ namespace PLUME.Viewer.Player
             return component;
         }
 
+        public void MoveGameObjectToScene(GameObjectIdentifier id, SceneIdentifier scene)
+        {
+            var go = GetOrCreateGameObjectByIdentifier(id);
+            var targetScene = GetOrCreateSceneByIdentifier(scene);
+            SceneManager.MoveGameObjectToScene(go, targetScene);
+        }
+        
         public bool TryDestroyGameObjectByIdentifier(GameObjectIdentifier id)
         {
             var gameObjectGuid = Guid.Parse(id.Guid);
@@ -691,5 +672,6 @@ namespace PLUME.Viewer.Player
         {
             return _active;
         }
+
     }
 }
