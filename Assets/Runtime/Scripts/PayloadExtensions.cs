@@ -232,11 +232,7 @@ namespace PLUME
 
         public static Bounds ToEngineType(this Sample.Common.Bounds bounds)
         {
-            return new Bounds
-            {
-                center = bounds.Center.ToEngineType(),
-                extents = bounds.Extents.ToEngineType()
-            };
+            return new Bounds(bounds.Center.ToEngineType(), bounds.Size.ToEngineType());
         }
 
         public static Rect ToEngineType(this Sample.Common.Rect rect)
