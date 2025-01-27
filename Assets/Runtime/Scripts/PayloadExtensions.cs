@@ -4,6 +4,7 @@ using PLUME.Sample.Common;
 using PLUME.Sample.Unity;
 using PLUME.Sample.Unity.UI;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 using AnimationCurve = UnityEngine.AnimationCurve;
@@ -131,6 +132,40 @@ namespace PLUME
                 [0, 26] = sphericalHarmonicsL2.Shb8
             };
             return shl2;
+        }
+
+        public static AmbientMode ToEngineType(this Sample.Unity.Settings.AmbientMode ambientMode)
+        {
+            return ambientMode switch
+            {
+                Sample.Unity.Settings.AmbientMode.Skybox => AmbientMode.Skybox,
+                Sample.Unity.Settings.AmbientMode.Trilight => AmbientMode.Trilight,
+                Sample.Unity.Settings.AmbientMode.Flat => AmbientMode.Flat,
+                Sample.Unity.Settings.AmbientMode.Custom => AmbientMode.Custom,
+                _ => throw new ArgumentOutOfRangeException(nameof(ambientMode), ambientMode, null)
+            };
+        }
+
+        public static FogMode ToEngineType(this Sample.Unity.Settings.FogMode fogMode)
+        {
+            return fogMode switch
+            {
+                Sample.Unity.Settings.FogMode.Linear => FogMode.Linear,
+                Sample.Unity.Settings.FogMode.Exponential => FogMode.Exponential,
+                Sample.Unity.Settings.FogMode.ExponentialSquared => FogMode.ExponentialSquared,
+                _ => throw new ArgumentOutOfRangeException(nameof(fogMode), fogMode, null)
+            };
+        }
+
+        public static DefaultReflectionMode ToEngineType(
+            this Sample.Unity.Settings.DefaultReflectionMode defaultReflectionMode)
+        {
+            return defaultReflectionMode switch
+            {
+                Sample.Unity.Settings.DefaultReflectionMode.Skybox => DefaultReflectionMode.Skybox,
+                Sample.Unity.Settings.DefaultReflectionMode.Custom => DefaultReflectionMode.Custom,
+                _ => throw new ArgumentOutOfRangeException(nameof(defaultReflectionMode), defaultReflectionMode, null)
+            };
         }
 
         public static LightType ToEngineType(this Sample.Unity.LightType lightType)
@@ -611,7 +646,7 @@ namespace PLUME
                 _ => throw new ArgumentOutOfRangeException(nameof(lineAlignment), lineAlignment, null)
             };
         }
-        
+
         public static LineTextureMode ToEngineType(this TextureMode lineTextureMode)
         {
             return lineTextureMode switch
@@ -624,7 +659,7 @@ namespace PLUME
                 _ => throw new ArgumentOutOfRangeException(nameof(lineTextureMode), lineTextureMode, null)
             };
         }
-        
+
         public static SpriteMaskInteraction ToEngineType(this MaskInteraction spriteMaskInteraction)
         {
             return spriteMaskInteraction switch
@@ -645,7 +680,7 @@ namespace PLUME
                 _ => throw new ArgumentOutOfRangeException(nameof(gradientMode), gradientMode, null)
             };
         }
-        
+
         public static ColorSpace ToEngineType(this Sample.Common.ColorSpace colorSpace)
         {
             return colorSpace switch
@@ -656,7 +691,7 @@ namespace PLUME
                 _ => throw new ArgumentOutOfRangeException(nameof(colorSpace), colorSpace, null)
             };
         }
-        
+
         public static WeightedMode ToEngineType(this Sample.Common.WeightedMode weightedMode)
         {
             return weightedMode switch
@@ -668,7 +703,7 @@ namespace PLUME
                 _ => throw new ArgumentOutOfRangeException(nameof(weightedMode), weightedMode, null)
             };
         }
-        
+
         public static AnimationCurve ToEngineType(this Sample.Common.AnimationCurve curve)
         {
             var animationCurve = new AnimationCurve();
@@ -686,10 +721,10 @@ namespace PLUME
                     weightedMode = keyframe.WeightedMode.ToEngineType()
                 });
             }
-            
+
             return animationCurve;
         }
-        
+
         public static Gradient ToEngineType(this ColorGradient gradient)
         {
             var colorKeys = new GradientColorKey[gradient.ColorKeys.Count];
