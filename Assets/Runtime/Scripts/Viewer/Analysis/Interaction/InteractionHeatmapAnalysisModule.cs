@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using PLUME.Sample.Unity;
@@ -61,33 +60,20 @@ namespace PLUME.Viewer.Analysis.Interaction
 
             foreach (var sample in samples)
             {
-                GameObjectIdentifier interactorIdentifier;
-                GameObjectIdentifier interactableIdentifier;
+                if (sample.Payload is not XRITKInteraction interaction)
+                    continue;
+
+                var interactorIdentifier = interaction.Interactor.GameObject;
+                var interactableIdentifier = interaction.Interactable.GameObject;
 
                 if (parameters.InteractionType == InteractionType.Hover &&
-                    sample.Payload is XRBaseInteractableHoverEnter hoverEnter)
-                {
-                    interactorIdentifier = hoverEnter.Interactor.GameObject;
-                    interactableIdentifier = hoverEnter.Component.GameObject;
-                }
-                else if (parameters.InteractionType == InteractionType.Select &&
-                         sample.Payload is XRBaseInteractableSelectEnter selectEnter)
-                {
-                    interactorIdentifier = selectEnter.Interactor.GameObject;
-                    interactableIdentifier = selectEnter.Component.GameObject;
-                }
-                else if (parameters.InteractionType == InteractionType.Activate &&
-                         sample.Payload is XRBaseInteractableActivateEnter activateEnter)
-                {
-                    interactorIdentifier = activateEnter.Interactor.GameObject;
-                    interactableIdentifier = activateEnter.Component.GameObject;
-                }
-                else
-                {
+                    interaction.Type != XRITKInteractionType.HoverEnter)
                     continue;
-                }
-
-                if (interactorIdentifier == null || interactableIdentifier == null)
+                if (parameters.InteractionType == InteractionType.Select &&
+                    interaction.Type != XRITKInteractionType.SelectEnter)
+                    continue;
+                if (parameters.InteractionType == InteractionType.Activate &&
+                    interaction.Type != XRITKInteractionType.ActivateEnter)
                     continue;
 
                 var interactorGameObjectGuid = Guid.Parse(interactorIdentifier.Guid);
