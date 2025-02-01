@@ -56,13 +56,12 @@ namespace PLUME.Viewer.Analysis.Interaction
                     $"{nameof(parameters.EndTime)} should be less or equal {nameof(parameters.StartTime)}.");
             }
 
-            var samples = record.OtherSamples.GetInTimeRange(parameters.StartTime, parameters.EndTime);
-
-            foreach (var sample in samples)
+            var frameSamples = record.Frames.GetInTimeRange(parameters.StartTime, parameters.EndTime);
+            var interactionSamples = frameSamples.SelectMany(frameSample => frameSample.Data)
+                .Where(s => s.Payload is XRITKInteraction).Select(s => s.Payload).Cast<XRITKInteraction>();
+            
+            foreach (var interaction in interactionSamples)
             {
-                if (sample.Payload is not XRITKInteraction interaction)
-                    continue;
-
                 var interactorIdentifier = interaction.Interactor.GameObject;
                 var interactableIdentifier = interaction.Interactable.GameObject;
 
