@@ -1,4 +1,5 @@
 ﻿using PLUME.Sample.Unity.XRITK;
+using PLUME.Viewer.Player.Proxy;
 using UnityEngine;
 
 namespace PLUME.Viewer.Player.Module.XRITK
@@ -8,31 +9,24 @@ namespace PLUME.Viewer.Player.Module.XRITK
         public override void PlaySample(PlayerContext ctx, RawSample rawSample)
         {
             var payload = rawSample.Payload;
-            var time = rawSample.Timestamp;
 
             switch (payload)
             {
                 case XRBaseInteractorCreate xrBaseInteractorCreate:
                 {
-                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractorCreate.Component.GameObject);
-                    Debug.Log($"XR Base Interactor : {go.name} has been created");
+                    ctx.GetOrCreateComponentByIdentifier<XRBaseInteractor>(xrBaseInteractorCreate.Component);
                     break;
                 }
                 case XRBaseInteractorDestroy xrBaseInteractorDestroy:
                 {
-                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractorDestroy.Component.GameObject);
-                    Debug.Log($"XR Base Interactor : {go.name} has been destroyed");
+                    ctx.TryDestroyComponentByIdentifier(xrBaseInteractorDestroy.Component);
                     break;
                 }
-                case XRBaseInteractableUpdate xrBaseInteractorSetEnabled:
+                case XRBaseInteractorUpdate xrBaseInteractorUpdate:
                 {
-                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractorSetEnabled.Component.GameObject);
-                    string message;
-                    if (xrBaseInteractorSetEnabled.Enabled)
-                        message = "XR Base Interactor : {0} has been enabled";
-                    else
-                        message = "XR Base Interactor : {0} has been disabled";
-                    Debug.Log(string.Format(message, go.name));
+                    var interactor =
+                        ctx.GetOrCreateComponentByIdentifier<XRBaseInteractor>(xrBaseInteractorUpdate.Component);
+                    interactor.enabled = xrBaseInteractorUpdate.Enabled;
                     break;
                 }
             }
