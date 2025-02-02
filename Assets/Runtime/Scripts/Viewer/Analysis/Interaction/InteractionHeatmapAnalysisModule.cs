@@ -62,8 +62,8 @@ namespace PLUME.Viewer.Analysis.Interaction
             
             foreach (var interaction in interactionSamples)
             {
-                var interactorIdentifier = interaction.Interactor.GameObject;
-                var interactableIdentifier = interaction.Interactable.GameObject;
+                var interactorGameObjectIdentifier = interaction.Interactor.GameObject;
+                var interactableGameObjectIdentifier = interaction.Interactable.GameObject;
 
                 if (parameters.InteractionType == InteractionType.Hover &&
                     interaction.Type != XRITKInteractionType.HoverEnter)
@@ -75,8 +75,8 @@ namespace PLUME.Viewer.Analysis.Interaction
                     interaction.Type != XRITKInteractionType.ActivateEnter)
                     continue;
 
-                var interactorGameObjectGuid = Guid.Parse(interactorIdentifier.Guid);
-                var interactableGameObjectGuid = Guid.Parse(interactableIdentifier.Guid);
+                var interactorGameObjectGuid = Guid.Parse(interactorGameObjectIdentifier.Guid);
+                var interactableGameObjectGuid = Guid.Parse(interactableGameObjectIdentifier.Guid);
 
                 if (!parameters.InteractorsIds.Contains(interactorGameObjectGuid)) continue;
 
