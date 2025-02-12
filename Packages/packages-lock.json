@@ -148,12 +148,6 @@
         "com.unity.render-pipelines.core": "14.0.10"
       }
     },
-    "fr.liris.unity-runtime-guid": {
-      "version": "file:Unity-Runtime-GUID",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,
