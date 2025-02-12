@@ -6,6 +6,7 @@ using PLUME.Viewer.Analysis;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 using Application = UnityEngine.Application;
 #if UNITY_STANDALONE_WIN
 using Cysharp.Threading.Tasks;
@@ -112,8 +113,6 @@ namespace PLUME.Viewer.Player
                 GraphicsSettings.defaultRenderPipeline =
                     RecordAssetBundle.GetOrDefaultAssetByIdentifier<RenderPipelineAsset>(Record.graphicsSettings
                         .DefaultRenderPipelineAsset);
-                
-                StartPlaying();
             };
 
             UniTask.WhenAll(recordLoadTask, assetBundleLoadTask).ContinueWith(() =>

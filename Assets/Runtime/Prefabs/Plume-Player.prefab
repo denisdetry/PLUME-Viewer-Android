@@ -609,6 +609,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34c0bb594daa4f82ab7aaa609e0279b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playOnFinishLoading: 1
   player: {fileID: 1041767726375591474}
   analysisModulesUI: {fileID: 5925700914892593912}
   analysisModules: {fileID: 1880541163528610243}

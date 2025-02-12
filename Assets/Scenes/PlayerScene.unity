@@ -195,6 +195,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Plume-Player
       objectReference: {fileID: 0}
+    - target: {fileID: 4522446303624477276, guid: b4a12f1ba345b14438d4ad048811be15, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5635019901420886447, guid: b4a12f1ba345b14438d4ad048811be15, type: 3}
       propertyPath: defaultInteractorsIds
       value: d2b9aa1ad6df4749beda14904c7ff4b3,dc709be51b374502b87ecda1dffe4785
