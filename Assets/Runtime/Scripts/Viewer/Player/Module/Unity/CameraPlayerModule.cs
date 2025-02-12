@@ -11,13 +11,13 @@ namespace PLUME.Viewer.Player.Module.Unity
             switch (rawSample.Payload)
             {
                 case CameraCreate cameraCreate:
-                    ctx.GetOrCreateComponentByIdentifier<Camera>(cameraCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<Camera>(cameraCreate.Component);
                     break;
                 case CameraDestroy cameraDestroy:
-                    ctx.TryDestroyComponentByIdentifier(cameraDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(cameraDestroy.Component);
                     break;
                 case CameraUpdate cameraUpdate:
-                    var cam = ctx.GetOrCreateComponentByIdentifier<Camera>(cameraUpdate.Id);
+                    var cam = ctx.GetOrCreateComponentByIdentifier<Camera>(cameraUpdate.Component);
 
                     if (cameraUpdate.HasNearClipPlane)
                         cam.nearClipPlane = cameraUpdate.NearClipPlane;

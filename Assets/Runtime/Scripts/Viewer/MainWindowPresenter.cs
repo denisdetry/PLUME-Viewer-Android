@@ -8,6 +8,8 @@ namespace PLUME.Viewer
     [RequireComponent(typeof(MainWindowUI))]
     public class MainWindowPresenter : MonoBehaviour
     {
+        public bool playOnFinishLoading;
+        
         public Player.Player player;
 
         public GameObject analysisModulesUI;
@@ -22,8 +24,11 @@ namespace PLUME.Viewer
             _mainWindowUI = GetComponent<MainWindowUI>();
             player.OnFinishLoading += () =>
             {
-                player.StartPlaying();
-                _mainWindowUI.RefreshPlayPauseButton();
+                if (playOnFinishLoading)
+                {
+                    player.StartPlaying();
+                    _mainWindowUI.RefreshPlayPauseButton();
+                }
             };
         }
 

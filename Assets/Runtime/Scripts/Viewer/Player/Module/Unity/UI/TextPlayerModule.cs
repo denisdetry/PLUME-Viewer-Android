@@ -13,17 +13,17 @@ namespace PLUME.Viewer.Player.Module.Unity.UI
             {
                 case TextCreate textCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<Text>(textCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<Text>(textCreate.Component);
                     break;
                 }
                 case TextDestroy textDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(textDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(textDestroy.Component);
                     break;
                 }
                 case TextUpdate textUpdate:
                 {
-                    var text = ctx.GetOrCreateComponentByIdentifier<Text>(textUpdate.Id);
+                    var text = ctx.GetOrCreateComponentByIdentifier<Text>(textUpdate.Component);
 
                     if (textUpdate.Color != null)
                     {
@@ -35,10 +35,10 @@ namespace PLUME.Viewer.Player.Module.Unity.UI
                         text.text = textUpdate.Text;
                     }
 
-                    if (textUpdate.FontId != null)
+                    if (textUpdate.Font != null)
                     {
-                        text.font = ctx.GetOrDefaultAssetByIdentifier<Font>(textUpdate.FontId);
-                        ctx.TryAddAssetIdentifierCorrespondence(textUpdate.FontId, text.font);
+                        text.font = ctx.GetOrDefaultAssetByIdentifier<Font>(textUpdate.Font);
+                        ctx.TryAddAssetIdentifierCorrespondence(textUpdate.Font, text.font);
                     }
 
                     if (textUpdate.HasFontStyle)

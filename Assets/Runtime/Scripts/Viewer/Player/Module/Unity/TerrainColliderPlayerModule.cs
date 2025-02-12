@@ -12,35 +12,35 @@ namespace PLUME.Viewer.Player.Module.Unity
             {
                 case TerrainColliderCreate terrainColliderCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<TerrainCollider>(terrainColliderCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<TerrainCollider>(terrainColliderCreate.Component);
                     break;
                 }
                 case TerrainColliderDestroy terrainColliderDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(terrainColliderDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(terrainColliderDestroy.Component);
                     break;
                 }
                 case TerrainColliderUpdate terrainColliderUpdate:
                 {
                     var terrainCollider =
-                        ctx.GetOrCreateComponentByIdentifier<TerrainCollider>(terrainColliderUpdate.Id);
+                        ctx.GetOrCreateComponentByIdentifier<TerrainCollider>(terrainColliderUpdate.Component);
 
                     if (terrainColliderUpdate.HasEnabled)
                     {
                         terrainCollider.enabled = terrainColliderUpdate.Enabled;
                     }
 
-                    if (terrainColliderUpdate.TerrainDataId != null)
+                    if (terrainColliderUpdate.TerrainData != null)
                     {
                         var terrainData =
-                            ctx.GetOrDefaultAssetByIdentifier<TerrainData>(terrainColliderUpdate.TerrainDataId);
+                            ctx.GetOrDefaultAssetByIdentifier<TerrainData>(terrainColliderUpdate.TerrainData);
                         terrainCollider.terrainData = terrainData;
                     }
 
-                    if (terrainColliderUpdate.MaterialId != null)
+                    if (terrainColliderUpdate.Material != null)
                     {
                         var material =
-                            ctx.GetOrDefaultAssetByIdentifier<PhysicMaterial>(terrainColliderUpdate.MaterialId);
+                            ctx.GetOrDefaultAssetByIdentifier<PhysicMaterial>(terrainColliderUpdate.Material);
                         terrainCollider.sharedMaterial = material;
                     }
 

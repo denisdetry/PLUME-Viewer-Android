@@ -10,21 +10,23 @@ namespace PLUME
     public class RecordAssetBundle
     {
         private readonly AssetBundle _assetBundle;
+        private readonly AssetBundle _sceneBundle;
 
-        public RecordAssetBundle(AssetBundle assetBundle)
+        public RecordAssetBundle(AssetBundle assetBundle, AssetBundle sceneBundle)
         {
             _assetBundle = assetBundle;
+            _sceneBundle = sceneBundle;
         }
 
         public T GetOrDefaultAssetByIdentifier<T>(AssetIdentifier identifier) where T : Object
         {
-            if (identifier.Id == "00000000000000000000000000000000")
+            if (string.IsNullOrEmpty(identifier.Guid) || Guid.Parse(identifier.Guid) == Guid.Empty)
                 return null;
 
-            if (string.IsNullOrEmpty(identifier.Path))
+            if (string.IsNullOrEmpty(identifier.AssetBundlePath))
                 return null;
 
-            var splitAssetIdentifier = identifier.Path.Split(":", 4);
+            var splitAssetIdentifier = identifier.AssetBundlePath.Split(":", 4);
 
             var assetSource = splitAssetIdentifier[0];
             var assetTypeName = splitAssetIdentifier[1];

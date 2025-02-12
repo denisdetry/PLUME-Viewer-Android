@@ -12,7 +12,7 @@ namespace PLUME.Viewer.Player.Module.Unity
             if (rawSample.Payload is QualitySettingsUpdate qualitySettingsUpdate)
             {
                 QualitySettings.renderPipeline =
-                    ctx.GetOrDefaultAssetByIdentifier<RenderPipelineAsset>(qualitySettingsUpdate.RenderPipelineAssetId);
+                    ctx.GetOrDefaultAssetByIdentifier<RenderPipelineAsset>(qualitySettingsUpdate.RenderPipelineAsset);
             }
         }
     }

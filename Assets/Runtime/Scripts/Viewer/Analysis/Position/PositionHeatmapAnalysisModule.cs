@@ -124,7 +124,7 @@ namespace PLUME.Viewer.Analysis.Position
 
             var projectionKernel = projectionShader.FindKernel("project_std_normal_distribution");
 
-            _generationContext = PlayerContext.NewTemporaryContext("GenerateHeatmapContext_" + Guid.NewGuid(), assets);
+            _generationContext = PlayerContext.CreatePlayerContext(assets);
 
             // key: mesh record id, value: sampled mesh containing values
             var meshSamplerResults = new Dictionary<int, MeshSamplerResult>();

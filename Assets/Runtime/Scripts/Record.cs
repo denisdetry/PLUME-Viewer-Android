@@ -3,8 +3,8 @@ using System.IO;
 using PLUME.Sample;
 using PLUME.Sample.Common;
 using PLUME.Sample.LSL;
-using PLUME.Sample.Unity.Settings;
 using PLUME.Sample.Unity;
+using PLUME.Sample.Unity.Settings;
 
 namespace PLUME
 {

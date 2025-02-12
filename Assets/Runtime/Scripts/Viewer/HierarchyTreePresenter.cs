@@ -40,7 +40,7 @@ namespace PLUME.Viewer
             {
                 case HierarchyCreateGameObjectEvent createEvt:
                 {
-                    var gameObjectGuid = Guid.Parse(createEvt.gameObjectIdentifier.GameObjectId);
+                    var gameObjectGuid = Guid.Parse(createEvt.gameObjectIdentifier.Guid);
 
                     if (!_currentItems.ContainsKey(gameObjectGuid) &&
                         !_createdOrUpdatedItems.ContainsKey(gameObjectGuid))
@@ -53,13 +53,13 @@ namespace PLUME.Viewer
                 }
                 case HierarchyDestroyGameObjectEvent destroyEvt:
                 {
-                    var gameObjectGuid = Guid.Parse(destroyEvt.gameObjectIdentifier.GameObjectId);
+                    var gameObjectGuid = Guid.Parse(destroyEvt.gameObjectIdentifier.Guid);
                     _destroyedItems.Add(gameObjectGuid);
                     break;
                 }
                 case HierarchyUpdateGameObjectNameEvent nameUpdateEvt:
                 {
-                    var gameObjectGuid = Guid.Parse(nameUpdateEvt.gameObjectIdentifier.GameObjectId);
+                    var gameObjectGuid = Guid.Parse(nameUpdateEvt.gameObjectIdentifier.Guid);
 
                     if (!_createdOrUpdatedItems.TryGetValue(gameObjectGuid, out var item))
                     {
@@ -75,7 +75,7 @@ namespace PLUME.Viewer
                 }
                 case HierarchyUpdateGameObjectSiblingIndexEvent siblingUpdateEvt:
                 {
-                    var gameObjectGuid = Guid.Parse(siblingUpdateEvt.gameObjectIdentifier.GameObjectId);
+                    var gameObjectGuid = Guid.Parse(siblingUpdateEvt.gameObjectIdentifier.Guid);
 
                     if (!_createdOrUpdatedItems.TryGetValue(gameObjectGuid, out var item))
                     {
@@ -91,7 +91,7 @@ namespace PLUME.Viewer
                 }
                 case HierarchyUpdateGameObjectEnabledEvent enabledUpdateEvt:
                 {
-                    var gameObjectGuid = Guid.Parse(enabledUpdateEvt.gameObjectIdentifier.GameObjectId);
+                    var gameObjectGuid = Guid.Parse(enabledUpdateEvt.gameObjectIdentifier.Guid);
 
                     if (!_createdOrUpdatedItems.TryGetValue(gameObjectGuid, out var item))
                     {
@@ -107,8 +107,8 @@ namespace PLUME.Viewer
                 }
                 case HierarchyUpdateGameObjectParentEvent updateParentEvt:
                 {
-                    var gameObjectGuid = Guid.Parse(updateParentEvt.gameObjectIdentifier.GameObjectId);
-                    var parentGameObjectGuid = Guid.Parse(updateParentEvt.parentIdentifier.GameObjectId);
+                    var gameObjectGuid = Guid.Parse(updateParentEvt.gameObjectIdentifier.Guid);
+                    var parentGameObjectGuid = Guid.Parse(updateParentEvt.parentIdentifier.Guid);
 
                     if (!_createdOrUpdatedItems.TryGetValue(gameObjectGuid, out var item))
                     {

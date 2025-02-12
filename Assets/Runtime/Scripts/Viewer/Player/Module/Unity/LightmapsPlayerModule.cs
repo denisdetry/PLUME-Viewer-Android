@@ -21,10 +21,10 @@ namespace PLUME.Viewer.Player.Module.Unity
                         lightmaps[i] = new LightmapData
                         {
                             lightmapColor =
-                                ctx.GetOrDefaultAssetByIdentifier<Texture2D>(payload.LightmapColorTextureId),
-                            lightmapDir = ctx.GetOrDefaultAssetByIdentifier<Texture2D>(payload.LightmapDirTextureId),
+                                ctx.GetOrDefaultAssetByIdentifier<Texture2D>(payload.LightmapColorTexture),
+                            lightmapDir = ctx.GetOrDefaultAssetByIdentifier<Texture2D>(payload.LightmapDirTexture),
                             shadowMask =
-                                ctx.GetOrDefaultAssetByIdentifier<Texture2D>(payload.LightmapShadowMaskTextureId)
+                                ctx.GetOrDefaultAssetByIdentifier<Texture2D>(payload.LightmapShadowMaskTexture)
                         };
                     }
 

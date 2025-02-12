@@ -1,23 +1,26 @@
-﻿#if UNITY_STANDALONE_WIN
-using System.Windows.Forms;
-#endif
-using System;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Threading;
-using Cysharp.Threading.Tasks;
 using PLUME.Viewer.Analysis;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 using Application = UnityEngine.Application;
+#if UNITY_STANDALONE_WIN
+using Cysharp.Threading.Tasks;
+using System.Windows.Forms;
+#endif
 
 namespace PLUME.Viewer.Player
 {
     // TODO: decouple the player from the record loading process
     [DisallowMultipleComponent]
-    public class Player : SingletonMonoBehaviour<Player>, IDisposable
+    public class Player : MonoBehaviour, IDisposable
     {
+        public static Player Instance { get; private set; }
+        
         public TypeRegistryProvider typeRegistryProvider;
 
         public bool loop;
@@ -66,7 +69,17 @@ namespace PLUME.Viewer.Player
 
         private new void Awake()
         {
-            base.Awake();
+            if (Instance != null && ReferenceEquals(Instance, this))
+            {
+                Debug.LogWarning("Player already exists. Removing new instance.");
+                Destroy(gameObject);
+            }
+            else
+            {
+                Instance = this;
+                transform.parent = null;
+                DontDestroyOnLoad(gameObject);
+            }
 
             var recordPath = GetRecordPath();
             var bundlePath = GetBundlePath(recordPath);
@@ -84,10 +97,10 @@ namespace PLUME.Viewer.Player
             PlayerModules = FindObjectsOfType<PlayerModule>();
             _bundleLoader = new BundleLoader(bundlePath);
 
-            var assetBundleLoadTask = _bundleLoader.LoadAsync().ContinueWith(async recordAssetBundle =>
+            var assetBundleLoadTask = _bundleLoader.LoadAsync().ContinueWith(recordAssetBundle =>
             {
                 RecordAssetBundle = recordAssetBundle;
-                _mainPlayerContext = await PlayerContext.CreateMainPlayerContext(recordAssetBundle);
+                _mainPlayerContext = PlayerContext.CreatePlayerContext(recordAssetBundle);
                 _mainPlayerContext.updatedHierarchy += mainContextUpdatedHierarchy;
             });
 
@@ -99,7 +112,7 @@ namespace PLUME.Viewer.Player
             {
                 GraphicsSettings.defaultRenderPipeline =
                     RecordAssetBundle.GetOrDefaultAssetByIdentifier<RenderPipelineAsset>(Record.graphicsSettings
-                        .DefaultRenderPipelineAssetId);
+                        .DefaultRenderPipelineAsset);
             };
 
             UniTask.WhenAll(recordLoadTask, assetBundleLoadTask).ContinueWith(() =>
@@ -259,15 +272,13 @@ namespace PLUME.Viewer.Player
             return true;
         }
 
-        public bool StopPlaying()
+        public async UniTask StopPlaying()
         {
             _isPlaying = false;
             _currentTimeNanoseconds = 0;
 
             foreach (var playerModule in PlayerModules) playerModule.Reset();
             _mainPlayerContext.Reset();
-
-            return true;
         }
 
         public void JumpToTime(ulong time)

@@ -11,23 +11,23 @@ namespace PLUME.Viewer.Player.Module.Unity
             switch (rawSample.Payload)
             {
                 case VolumeCreate volumeCreate:
-                    ctx.GetOrCreateComponentByIdentifier<Volume>(volumeCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<Volume>(volumeCreate.Component);
                     break;
                 case VolumeUpdateEnabled volumeUpdateEnabled:
                 {
-                    var volume = ctx.GetOrCreateComponentByIdentifier<Volume>(volumeUpdateEnabled.Id);
+                    var volume = ctx.GetOrCreateComponentByIdentifier<Volume>(volumeUpdateEnabled.Component);
                     volume.enabled = volumeUpdateEnabled.Enabled;
                     break;
                 }
                 case VolumeUpdate volumeUpdate:
                 {
-                    var volume = ctx.GetOrCreateComponentByIdentifier<Volume>(volumeUpdate.Id);
+                    var volume = ctx.GetOrCreateComponentByIdentifier<Volume>(volumeUpdate.Component);
                     volume.isGlobal = volumeUpdate.IsGlobal;
                     volume.blendDistance = volumeUpdate.BlendDistance;
                     volume.weight = volumeUpdate.Weight;
                     volume.priority = volumeUpdate.Priority;
                     volume.sharedProfile =
-                        ctx.GetOrDefaultAssetByIdentifier<VolumeProfile>(volumeUpdate.SharedProfileId);
+                        ctx.GetOrDefaultAssetByIdentifier<VolumeProfile>(volumeUpdate.SharedProfile);
                     break;
                 }
             }

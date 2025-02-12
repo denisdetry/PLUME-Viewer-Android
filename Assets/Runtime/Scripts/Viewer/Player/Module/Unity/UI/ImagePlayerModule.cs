@@ -13,27 +13,27 @@ namespace PLUME.Viewer.Player.Module.Unity.UI
             {
                 case ImageCreate imageCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<Image>(imageCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<Image>(imageCreate.Component);
                     break;
                 }
                 case ImageDestroy imageDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(imageDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(imageDestroy.Component);
                     break;
                 }
                 case ImageUpdate imageUpdate:
                 {
-                    var img = ctx.GetOrCreateComponentByIdentifier<Image>(imageUpdate.Id);
+                    var img = ctx.GetOrCreateComponentByIdentifier<Image>(imageUpdate.Component);
 
                     if (imageUpdate.HasType)
                     {
                         img.type = imageUpdate.Type.ToEngineType();
                     }
 
-                    if (imageUpdate.SpriteId != null)
+                    if (imageUpdate.Sprite != null)
                     {
-                        img.sprite = ctx.GetOrDefaultAssetByIdentifier<Sprite>(imageUpdate.SpriteId);
-                        ctx.TryAddAssetIdentifierCorrespondence(imageUpdate.SpriteId, img.sprite);
+                        img.sprite = ctx.GetOrDefaultAssetByIdentifier<Sprite>(imageUpdate.Sprite);
+                        ctx.TryAddAssetIdentifierCorrespondence(imageUpdate.Sprite, img.sprite);
                     }
 
                     break;

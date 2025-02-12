@@ -12,18 +12,18 @@ namespace PLUME.Viewer.Player.Module.Unity
             {
                 case ReflectionProbeCreate reflectionProbeCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<ReflectionProbe>(reflectionProbeCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<ReflectionProbe>(reflectionProbeCreate.Component);
                     break;
                 }
                 case ReflectionProbeDestroy reflectionProbeDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(reflectionProbeDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(reflectionProbeDestroy.Component);
                     break;
                 }
                 case ReflectionProbeUpdate reflectionProbeUpdateEnabled:
                 {
                     var replayProbe =
-                        ctx.GetOrCreateComponentByIdentifier<ReflectionProbe>(reflectionProbeUpdateEnabled.Id);
+                        ctx.GetOrCreateComponentByIdentifier<ReflectionProbe>(reflectionProbeUpdateEnabled.Component);
 
                     if (reflectionProbeUpdateEnabled.HasEnabled)
                     {
@@ -116,17 +116,17 @@ namespace PLUME.Viewer.Player.Module.Unity
                         replayProbe.cullingMask = reflectionProbeUpdateEnabled.CullingMask;
                     }
 
-                    if (reflectionProbeUpdateEnabled.CustomBakedTextureId != null)
+                    if (reflectionProbeUpdateEnabled.CustomBakedTexture != null)
                     {
                         replayProbe.customBakedTexture =
                             ctx.GetOrDefaultAssetByIdentifier<Texture>(
-                                reflectionProbeUpdateEnabled.CustomBakedTextureId);
+                                reflectionProbeUpdateEnabled.CustomBakedTexture);
                     }
 
-                    if (reflectionProbeUpdateEnabled.BakedTextureId != null)
+                    if (reflectionProbeUpdateEnabled.BakedTexture != null)
                     {
                         replayProbe.bakedTexture =
-                            ctx.GetOrDefaultAssetByIdentifier<Texture>(reflectionProbeUpdateEnabled.BakedTextureId);
+                            ctx.GetOrDefaultAssetByIdentifier<Texture>(reflectionProbeUpdateEnabled.BakedTexture);
                     }
 
                     break;

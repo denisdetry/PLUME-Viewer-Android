@@ -12,12 +12,12 @@ namespace PLUME.Viewer.Player.Module.Unity
             {
                 case MeshRendererCreate meshRendererCreate:
                 {
-                    ctx.GetOrCreateComponentByIdentifier<MeshRenderer>(meshRendererCreate.Id);
+                    ctx.GetOrCreateComponentByIdentifier<MeshRenderer>(meshRendererCreate.Component);
                     break;
                 }
                 case MeshRendererDestroy meshRendererDestroy:
                 {
-                    ctx.TryDestroyComponentByIdentifier(meshRendererDestroy.Id);
+                    ctx.TryDestroyComponentByIdentifier(meshRendererDestroy.Component);
                     break;
                 }
             }

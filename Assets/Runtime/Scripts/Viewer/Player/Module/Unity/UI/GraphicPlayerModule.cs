@@ -13,17 +13,17 @@ namespace PLUME.Viewer.Player.Module.Unity.UI
             {
                 case GraphicUpdate graphicUpdate:
                 {
-                    var graphic = ctx.GetOrCreateComponentByIdentifier<Graphic>(graphicUpdate.Id);
+                    var graphic = ctx.GetOrCreateComponentByIdentifier<Graphic>(graphicUpdate.Component);
 
                     if (graphicUpdate.Color != null)
                     {
                         graphic.color = graphicUpdate.Color.ToEngineType();
                     }
 
-                    if (graphicUpdate.MaterialId != null)
+                    if (graphicUpdate.Material != null)
                     {
-                        graphic.material = ctx.GetOrDefaultAssetByIdentifier<Material>(graphicUpdate.MaterialId);
-                        ctx.TryAddAssetIdentifierCorrespondence(graphicUpdate.MaterialId, graphic.material);
+                        graphic.material = ctx.GetOrDefaultAssetByIdentifier<Material>(graphicUpdate.Material);
+                        ctx.TryAddAssetIdentifierCorrespondence(graphicUpdate.Material, graphic.material);
                     }
                     
                     if (graphicUpdate.HasRaycastTarget)

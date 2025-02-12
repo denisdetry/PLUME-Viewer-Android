@@ -26,19 +26,19 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
   m_HaloTexture: {fileID: 0}
   m_SpotCookie: {fileID: 10001, guid: 0000000000000000e000000000000000, type: 0}
   m_DefaultReflectionMode: 0
-  m_DefaultReflectionResolution: 128
-  m_ReflectionBounces: 1
-  m_ReflectionIntensity: 1
+  m_DefaultReflectionResolution: 64
+  m_ReflectionBounces: 2
+  m_ReflectionIntensity: 0.1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -70,7 +70,7 @@ LightmapSettings:
     m_FinalGather: 0
     m_FinalGatherFiltering: 1
     m_FinalGatherRayCount: 256
-    m_ReflectionCompression: 2
+    m_ReflectionCompression: 1
     m_MixedBakeMode: 2
     m_BakeBackend: 1
     m_PVRSampling: 1
@@ -97,7 +97,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 4f4494ef166c3fd4cac57959dfa51050, type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -143,12 +143,12 @@ PrefabInstance:
       propertyPath: defaultProjectionReceiversIds
       value: eff8c3343341490e902a0c4a24ea12c0,b507c89f32e34f53a8467bda16b67400,c9515f9fa25549bcbe001fd97a3627b7,9cba7a46d6b145d79c53dc9a802c0e3f,0b85fe0febdd4abe9f5600ad30902015,222c32f08ecb4bd2a350caf86392a9af,724845965db1492a8546b3ee69f9acce,3d0ffc7f53c94a25bd32f90c295d9022,e802dd7ca0fb412eb28a4509cebf8bf4,6ae3ea8c98a14585b5070799a7a57da3,d431ae4868ee41aaa29a6addff6a7a77,4b1765337c844d619a4e23d0a5cacf62,2425bf36288a4265879cda31cad50e1d,ac6c22c54c624599b2ef9a527d79c0b9,7a5e7664a16f4914819e946b97404d7b,6b5cb1fb4c414623a751015d281fb0d4,a424c73c158b40a0a559fa30656bf047,d1c19d282f47433ca0edcd56b7062616,eb852e276a8f4de5844efb64c8eed496,fa7fab7c9195438083b63222bc19195d,207e8dcd1e754079b269c4451dd8d854,9721437ede2d4716b78110475638f34e,0982134598f84dc09929cf81170a76d8,40298d078b87450085ad6a589b04e005
       objectReference: {fileID: 0}
-    - target: {fileID: 2099607272900361961, guid: b4a12f1ba345b14438d4ad048811be15, type: 3}
-      propertyPath: m_RequiresDepthTextureOption
+    - target: {fileID: 845563009106389425, guid: b4a12f1ba345b14438d4ad048811be15, type: 3}
+      propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 2099607272900361961, guid: b4a12f1ba345b14438d4ad048811be15, type: 3}
-      propertyPath: m_RequiresOpaqueTextureOption
+    - target: {fileID: 1622235944094969762, guid: b4a12f1ba345b14438d4ad048811be15, type: 3}
+      propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3853190476271717280, guid: b4a12f1ba345b14438d4ad048811be15, type: 3}
@@ -195,12 +195,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Plume-Player
       objectReference: {fileID: 0}
-    - target: {fileID: 3958279258794922459, guid: b4a12f1ba345b14438d4ad048811be15, type: 3}
-      propertyPath: m_RequiresDepthTextureOption
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3958279258794922459, guid: b4a12f1ba345b14438d4ad048811be15, type: 3}
-      propertyPath: m_RequiresOpaqueTextureOption
+    - target: {fileID: 4522446303624477276, guid: b4a12f1ba345b14438d4ad048811be15, type: 3}
+      propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5635019901420886447, guid: b4a12f1ba345b14438d4ad048811be15, type: 3}

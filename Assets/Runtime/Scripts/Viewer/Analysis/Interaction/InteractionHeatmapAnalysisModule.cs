@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using PLUME.Sample.Unity;
@@ -57,41 +56,27 @@ namespace PLUME.Viewer.Analysis.Interaction
                     $"{nameof(parameters.EndTime)} should be less or equal {nameof(parameters.StartTime)}.");
             }
 
-            var samples = record.OtherSamples.GetInTimeRange(parameters.StartTime, parameters.EndTime);
-
-            foreach (var sample in samples)
+            var frameSamples = record.Frames.GetInTimeRange(parameters.StartTime, parameters.EndTime);
+            var interactionSamples = frameSamples.SelectMany(frameSample => frameSample.Data)
+                .Where(s => s.Payload is XRITKInteraction).Select(s => s.Payload).Cast<XRITKInteraction>();
+            
+            foreach (var interaction in interactionSamples)
             {
-                GameObjectIdentifier interactorIdentifier;
-                GameObjectIdentifier interactableIdentifier;
+                var interactorGameObjectIdentifier = interaction.Interactor.GameObject;
+                var interactableGameObjectIdentifier = interaction.Interactable.GameObject;
 
                 if (parameters.InteractionType == InteractionType.Hover &&
-                    sample.Payload is XRBaseInteractableHoverEnter hoverEnter)
-                {
-                    interactorIdentifier = hoverEnter.InteractorCurrent.ParentId;
-                    interactableIdentifier = hoverEnter.Id.ParentId;
-                }
-                else if (parameters.InteractionType == InteractionType.Select &&
-                         sample.Payload is XRBaseInteractableSelectEnter selectEnter)
-                {
-                    interactorIdentifier = selectEnter.InteractorCurrent.ParentId;
-                    interactableIdentifier = selectEnter.Id.ParentId;
-                }
-                else if (parameters.InteractionType == InteractionType.Activate &&
-                         sample.Payload is XRBaseInteractableActivateEnter activateEnter)
-                {
-                    interactorIdentifier = activateEnter.InteractorCurrent.ParentId;
-                    interactableIdentifier = activateEnter.Id.ParentId;
-                }
-                else
-                {
+                    interaction.Type != XRITKInteractionType.HoverEnter)
                     continue;
-                }
-
-                if (interactorIdentifier == null || interactableIdentifier == null)
+                if (parameters.InteractionType == InteractionType.Select &&
+                    interaction.Type != XRITKInteractionType.SelectEnter)
+                    continue;
+                if (parameters.InteractionType == InteractionType.Activate &&
+                    interaction.Type != XRITKInteractionType.ActivateEnter)
                     continue;
 
-                var interactorGameObjectGuid = Guid.Parse(interactorIdentifier.GameObjectId);
-                var interactableGameObjectGuid = Guid.Parse(interactableIdentifier.GameObjectId);
+                var interactorGameObjectGuid = Guid.Parse(interactorGameObjectIdentifier.Guid);
+                var interactableGameObjectGuid = Guid.Parse(interactableGameObjectIdentifier.Guid);
 
                 if (!parameters.InteractorsIds.Contains(interactorGameObjectGuid)) continue;
 

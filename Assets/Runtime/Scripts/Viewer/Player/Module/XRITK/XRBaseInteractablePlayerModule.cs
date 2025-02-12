@@ -1,5 +1,6 @@
 ﻿using PLUME.Sample;
 using PLUME.Sample.Unity.XRITK;
+using PLUME.Viewer.Player.Proxy;
 using UnityEngine;
 
 namespace PLUME.Viewer.Player.Module.XRITK
@@ -9,31 +10,23 @@ namespace PLUME.Viewer.Player.Module.XRITK
         public override void PlaySample(PlayerContext ctx, RawSample rawSample)
         {
             var payload = rawSample.Payload;
-            var time = rawSample.Timestamp;
 
             switch (payload)
             {
                 case XRBaseInteractableCreate xrBaseInteractableCreate:
                 {
-                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractableCreate.Id.ParentId);
-                    Debug.Log($"XR Base Interactable : {go.name} has been created");
+                    ctx.GetOrCreateComponentByIdentifier<XRBaseInteractable>(xrBaseInteractableCreate.Component);
                     break;
                 }
                 case XRBaseInteractableDestroy xrBaseInteractableDestroy:
                 {
-                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractableDestroy.Id.ParentId);
-                    Debug.Log($"XR Base Interactable : {go.name} has been destroyed");
+                    ctx.TryDestroyComponentByIdentifier(xrBaseInteractableDestroy.Component);
                     break;
                 }
-                case XRBaseInteractableUpdate xrBaseInteractableSetEnabled:
+                case XRBaseInteractableUpdate xrBaseInteractableUpdate:
                 {
-                    var go = ctx.GetOrCreateGameObjectByIdentifier(xrBaseInteractableSetEnabled.Id.ParentId);
-                    string message;
-                    if (xrBaseInteractableSetEnabled.Enabled)
-                        message = "XR Base Interactable : {0} has been enabled";
-                    else
-                        message = "XR Base Interactable : {0} has been disabled";
-                    Debug.Log(string.Format(message, go.name));
+                    var interactable = ctx.GetOrCreateComponentByIdentifier<XRBaseInteractable>(xrBaseInteractableUpdate.Component);
+                    interactable.enabled = xrBaseInteractableUpdate.Enabled;
                     break;
                 }
             }

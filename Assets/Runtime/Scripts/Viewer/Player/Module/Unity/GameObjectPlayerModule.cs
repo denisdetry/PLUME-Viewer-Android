@@ -1,5 +1,4 @@
-﻿using PLUME.Sample;
-using PLUME.Sample.Unity;
+﻿using PLUME.Sample.Unity;
 using UnityEngine;
 
 namespace PLUME.Viewer.Player.Module.Unity
@@ -41,12 +40,17 @@ namespace PLUME.Viewer.Player.Module.Unity
 
                     if (gameObjectUpdate.HasTag)
                     {
+                        if (gameObjectUpdate.Tag == "MainCamera")
+                        {
+                            go.tag = "MainCamera";
+                        }
+
                         ctx.SetGameObjectTag(gameObjectUpdate.Id, gameObjectUpdate.Tag);
                     }
 
-                    if (gameObjectUpdate.HasSceneId)
+                    if (gameObjectUpdate.Scene != null)
                     {
-                        // TODO handle multiple scenes
+                        ctx.MoveGameObjectToScene(gameObjectUpdate.Id, gameObjectUpdate.Scene);
                     }
 
                     break;

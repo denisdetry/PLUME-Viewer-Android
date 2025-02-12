@@ -15,17 +15,42 @@ namespace PLUME.Viewer.Player.Module.Unity
             {
                 case RectTransformCreate rectTransformCreate:
                 {
-                    ctx.GetOrCreateRectTransformByIdentifier(rectTransformCreate.Id);
+                    ctx.GetOrCreateRectTransformByIdentifier(rectTransformCreate.Component);
                     break;
                 }
                 case RectTransformDestroy rectTransformDestroy:
                 {
-                    ctx.TryDestroyGameObjectByIdentifier(rectTransformDestroy.Id.ParentId);
+                    ctx.TryDestroyGameObjectByIdentifier(rectTransformDestroy.Component.GameObject);
                     break;
                 }
                 case RectTransformUpdate rectTransformUpdate:
                 {
-                    var t = ctx.GetOrCreateRectTransformByIdentifier(rectTransformUpdate.Id);
+                    var t = ctx.GetOrCreateRectTransformByIdentifier(rectTransformUpdate.Component);
+                    
+                    if (rectTransformUpdate.ParentTransform != null)
+                    {
+                        ctx.SetParent(rectTransformUpdate.Component, rectTransformUpdate.ParentTransform);
+                    }
+
+                    if (rectTransformUpdate.HasSiblingIdx)
+                    {
+                        ctx.SetSiblingIndex(rectTransformUpdate.Component, rectTransformUpdate.SiblingIdx);
+                    }
+
+                    if (rectTransformUpdate.LocalPosition != null)
+                    {
+                        t.localPosition = rectTransformUpdate.LocalPosition.ToEngineType();
+                    }
+
+                    if (rectTransformUpdate.LocalRotation != null)
+                    {
+                        t.localRotation = rectTransformUpdate.LocalRotation.ToEngineType();
+                    }
+
+                    if (rectTransformUpdate.LocalScale != null)
+                    {
+                        t.localScale = rectTransformUpdate.LocalScale.ToEngineType();
+                    }
                     
                     if (rectTransformUpdate.AnchorMin != null)
                     {

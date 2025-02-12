@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using PLUME.Sample;
 using PLUME.Sample.Unity;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.SceneManagement;
 using LoadSceneMode = UnityEngine.SceneManagement.LoadSceneMode;
 using Object = UnityEngine.Object;
@@ -17,10 +18,9 @@ namespace PLUME.Viewer.Player
 
         private static readonly List<PlayerContext> Contexts = new();
 
+        private readonly Guid _contextGuid = Guid.NewGuid();
+
         private readonly RecordAssetBundle _recordAssetBundle;
-        private readonly string _name;
-        private Scene _scene;
-        private readonly Dictionary<int, bool> _sceneRootObjectsActive = new();
         private bool _active;
 
         /**
@@ -38,56 +38,17 @@ namespace PLUME.Viewer.Player
         private readonly Dictionary<int, Transform> _transformsByInstanceId = new();
         private readonly Dictionary<int, Component> _componentByInstanceId = new();
 
-        private PlayerContext(string name, RecordAssetBundle recordAssetBundle, Scene scene)
+        private readonly Dictionary<Guid, Scene> _scenesByGuid = new();
+        private readonly Dictionary<Scene, List<GameObject>> _cachedSceneRootObjectsActive = new();
+
+        private PlayerContext(RecordAssetBundle recordAssetBundle)
         {
-            _name = name;
             _recordAssetBundle = recordAssetBundle;
-            _scene = scene;
-        }
-        
-        internal static async UniTask<PlayerContext> CreateMainPlayerContext(RecordAssetBundle assets)
-        {
-            const string mainPlayerContextName = "MainPlayerContext";
-            
-            if (Contexts.Select(ctx => ctx._name).Contains(mainPlayerContextName))
-            {
-                throw new Exception("MainPlayerContext already exists");
-            }
-            
-            var loadSceneParameters = new LoadSceneParameters(LoadSceneMode.Additive);
-            await SceneManager.LoadSceneAsync(mainPlayerContextName, loadSceneParameters);
-            var scene = SceneManager.GetSceneByName(mainPlayerContextName);
-
-            if (!scene.IsValid())
-                throw new Exception("Failed to load MainPlayerContext scene");
-            
-            SceneManager.SetActiveScene(scene);
-            
-            var ctx = new PlayerContext(mainPlayerContextName, assets, scene);
-            Contexts.Add(ctx);
-            return ctx;
         }
 
-        public static PlayerContext NewTemporaryContext(string name, RecordAssetBundle assets)
+        internal static PlayerContext CreatePlayerContext(RecordAssetBundle assets)
         {
-            if (name == "MainPlayerContext")
-            {
-                throw new Exception("The name MainPlayerContext is reserved");
-            }
-            
-            if (Contexts.Select(ctx => ctx._name).Contains(name))
-            {
-                throw new Exception($"A context with this name already exists: {name}");
-            }
-            
-            var scene = SceneManager.CreateScene(name);
-            SceneManager.SetActiveScene(scene);
-            
-            // Apply default lighting settings
-            // RenderSettings.skybox = BuiltinAssets.Instance.defaultSkybox;
-            // Lightmapping.lightingSettings = Resources.Load<LightingSettings>("Default Lighting Settings");
-
-            var ctx = new PlayerContext(name, assets, scene);
+            var ctx = new PlayerContext(assets);
             Contexts.Add(ctx);
             return ctx;
         }
@@ -100,7 +61,9 @@ namespace PLUME.Viewer.Player
                 context._gameObjectsTagByInstanceId.Clear();
                 context._transformsByInstanceId.Clear();
                 context._componentByInstanceId.Clear();
-                SceneManager.UnloadSceneAsync(context._scene);
+
+                foreach (var scene in context._scenesByGuid.Values)
+                    SceneManager.UnloadSceneAsync(scene);
             }
 
             Contexts.Clear();
@@ -116,7 +79,8 @@ namespace PLUME.Viewer.Player
             ctx._gameObjectsTagByInstanceId.Clear();
             ctx._transformsByInstanceId.Clear();
             ctx._componentByInstanceId.Clear();
-            SceneManager.UnloadSceneAsync(ctx._scene);
+            foreach (var scene in ctx._scenesByGuid.Values)
+                SceneManager.UnloadSceneAsync(scene);
             Contexts.Remove(ctx);
 
             SceneManager.SetActiveScene(SceneManager.GetSceneAt(0));
@@ -133,9 +97,8 @@ namespace PLUME.Viewer.Player
                 ctx._active = false;
             }
 
-            playerContext.EnableRootGameObjects();
+            playerContext.RestoreRootGameObjectsActive();
             playerContext._active = true;
-            SceneManager.SetActiveScene(playerContext._scene);
         }
 
         public static PlayerContext GetActiveContext()
@@ -181,10 +144,12 @@ namespace PLUME.Viewer.Player
 
         public void Reset()
         {
-            foreach (var rootGameObject in _scene.GetRootGameObjects())
+            foreach (var scene in _scenesByGuid.Values)
             {
-                Object.DestroyImmediate(rootGameObject);
+                SceneManager.UnloadSceneAsync(scene);
             }
+
+            _scenesByGuid.Clear();
 
             updatedHierarchy?.Invoke(new HierarchyForceRebuild());
 
@@ -242,8 +207,8 @@ namespace PLUME.Viewer.Player
             var t = GetOrCreateTransformByIdentifier(transformIdentifier);
             var parent = GetOrCreateTransformByIdentifier(parentTransformIdentifier);
             t.SetParent(parent);
-            updatedHierarchy?.Invoke(new HierarchyUpdateGameObjectParentEvent(transformIdentifier.ParentId,
-                parentTransformIdentifier.ParentId, t.GetSiblingIndex()));
+            updatedHierarchy?.Invoke(new HierarchyUpdateGameObjectParentEvent(transformIdentifier.GameObject,
+                parentTransformIdentifier.GameObject, t.GetSiblingIndex()));
         }
 
         public void SetName(GameObjectIdentifier id, string name)
@@ -252,13 +217,13 @@ namespace PLUME.Viewer.Player
             go.name = name;
             updatedHierarchy?.Invoke(new HierarchyUpdateGameObjectNameEvent(id, name));
         }
-        
+
         public void SetSiblingIndex(ComponentIdentifier transformIdentifier, int siblingIndex)
         {
             var t = GetOrCreateTransformByIdentifier(transformIdentifier);
             t.SetSiblingIndex(siblingIndex);
             updatedHierarchy?.Invoke(
-                new HierarchyUpdateGameObjectSiblingIndexEvent(transformIdentifier.ParentId, siblingIndex));
+                new HierarchyUpdateGameObjectSiblingIndexEvent(transformIdentifier.GameObject, siblingIndex));
         }
 
         public void SetActive(GameObjectIdentifier id, bool active)
@@ -268,25 +233,35 @@ namespace PLUME.Viewer.Player
             updatedHierarchy?.Invoke(new HierarchyUpdateGameObjectEnabledEvent(id, active));
         }
 
-        private void EnableRootGameObjects()
+        private void RestoreRootGameObjectsActive()
         {
-            foreach (var go in _scene.GetRootGameObjects())
+            foreach (var scene in _scenesByGuid.Values)
             {
-                if (_sceneRootObjectsActive.TryGetValue(go.GetInstanceID(), out var active))
+                var cachedRootObjectsActive = _cachedSceneRootObjectsActive.GetValueOrDefault(scene);
+
+                foreach (var rootGameObject in scene.GetRootGameObjects())
                 {
-                    go.SetActive(active);
+                    rootGameObject.SetActive(cachedRootObjectsActive.Contains(rootGameObject));
                 }
+
+                ListPool<GameObject>.Release(cachedRootObjectsActive);
             }
         }
 
         private void DisableRootGameObjects()
         {
-            _sceneRootObjectsActive.Clear();
+            _cachedSceneRootObjectsActive.Clear();
 
-            foreach (var go in _scene.GetRootGameObjects())
+            foreach (var scene in _scenesByGuid.Values)
             {
-                _sceneRootObjectsActive.Add(go.GetInstanceID(), go.activeSelf);
-                go.SetActive(false);
+                var rootGameObjects = scene.GetRootGameObjects();
+                _cachedSceneRootObjectsActive[scene] = ListPool<GameObject>.Get();
+                _cachedSceneRootObjectsActive[scene].AddRange(rootGameObjects.Where(go => go.activeSelf));
+                
+                foreach (var go in rootGameObjects)
+                {
+                    go.SetActive(false);
+                }
             }
         }
 
@@ -300,11 +275,52 @@ namespace PLUME.Viewer.Player
             return _componentByInstanceId.Values.Where(component => component != null);
         }
 
+        public Scene GetOrCreateSceneByIdentifier(SceneIdentifier sceneId)
+        {
+            var sceneGuid = Guid.Parse(sceneId.Guid);
+
+            if (sceneGuid == Guid.Empty)
+                return default;
+            
+            if (_scenesByGuid.TryGetValue(sceneGuid, out var scene))
+            {
+                return scene;
+            }
+            
+            try
+            {
+                // Ensure the scene name is unique to prevent error when unloading and loading the same scene (e.g. when going backward)
+                var sceneName = sceneId.Name + "-" + Guid.NewGuid();
+                scene = SceneManager.CreateScene(sceneName);
+                _scenesByGuid[sceneGuid] = scene;
+                return scene;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to create scene {sceneId.Name}: {ex.Message}");
+                return default;
+            }
+        }
+        
+        public void DestroyScene(SceneIdentifier sceneId)
+        {
+            var sceneGuid = Guid.Parse(sceneId.Guid);
+
+            if (sceneGuid == Guid.Empty)
+                return;
+
+            if (_scenesByGuid.TryGetValue(sceneGuid, out var scene))
+            {
+                SceneManager.UnloadSceneAsync(scene);
+                _scenesByGuid.Remove(sceneGuid);
+            }
+        }
+
         public GameObject GetOrCreateGameObjectByIdentifier(GameObjectIdentifier id)
         {
-            var gameObjectGuid = Guid.Parse(id.GameObjectId);
-            var transformGuid = Guid.Parse(id.TransformId);
-            
+            var gameObjectGuid = Guid.Parse(id.Guid);
+            var transformGuid = Guid.Parse(id.TransformGuid);
+
             if (transformGuid == Guid.Empty)
                 return null;
 
@@ -339,10 +355,10 @@ namespace PLUME.Viewer.Player
                     return go;
                 }
             }
-
-            if (!IsActive())
-                throw new Exception($"Trying to instantiate a GameObject in context {_name}");
-
+            
+            var scene = GetOrCreateSceneByIdentifier(id.Scene);
+            SceneManager.SetActiveScene(scene);
+            
             var newGameObject = new GameObject();
             var newTransform = newGameObject.transform;
             _gameObjectsByInstanceId[newGameObject.GetInstanceID()] = newGameObject;
@@ -355,9 +371,9 @@ namespace PLUME.Viewer.Player
 
         public Transform GetOrCreateTransformByIdentifier(ComponentIdentifier id)
         {
-            var transformGuid = Guid.Parse(id.ComponentId);
-            var gameObjectGuid = Guid.Parse(id.ParentId.GameObjectId);
-            
+            var transformGuid = Guid.Parse(id.Guid);
+            var gameObjectGuid = Guid.Parse(id.GameObject.Guid);
+
             if (transformGuid == Guid.Empty)
                 return null;
 
@@ -393,21 +409,24 @@ namespace PLUME.Viewer.Player
                 }
             }
 
+            var scene = GetOrCreateSceneByIdentifier(id.GameObject.Scene);
+            SceneManager.SetActiveScene(scene);
+            
             var newGameObject = new GameObject();
             var newTransform = newGameObject.transform;
             _gameObjectsByInstanceId[newGameObject.GetInstanceID()] = newGameObject;
             _transformsByInstanceId[newTransform.GetInstanceID()] = newTransform;
             TryAddIdentifierCorrespondence(transformGuid, newTransform.GetInstanceID());
             TryAddIdentifierCorrespondence(gameObjectGuid, newGameObject.GetInstanceID());
-            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.ParentId));
+            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.GameObject));
             return newTransform;
         }
 
         public RectTransform GetOrCreateRectTransformByIdentifier(ComponentIdentifier id)
         {
-            var transformGuid = Guid.Parse(id.ComponentId);
-            var gameObjectGuid = Guid.Parse(id.ParentId.GameObjectId);
-            
+            var transformGuid = Guid.Parse(id.Guid);
+            var gameObjectGuid = Guid.Parse(id.GameObject.Guid);
+
             if (transformGuid == Guid.Empty)
                 return null;
 
@@ -452,14 +471,14 @@ namespace PLUME.Viewer.Player
                     return rectTransform;
                 }
             }
-            
+
             var newGameObject = new GameObject();
             var newTransform = newGameObject.AddComponent<RectTransform>();
             _gameObjectsByInstanceId[newGameObject.GetInstanceID()] = newGameObject;
             _transformsByInstanceId[newTransform.GetInstanceID()] = newTransform;
             TryAddIdentifierCorrespondence(transformGuid, newTransform.GetInstanceID());
             TryAddIdentifierCorrespondence(gameObjectGuid, newGameObject.GetInstanceID());
-            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.ParentId));
+            updatedHierarchy?.Invoke(new HierarchyCreateGameObjectEvent(id.GameObject));
             return newTransform;
         }
 
@@ -470,8 +489,8 @@ namespace PLUME.Viewer.Player
 
         public T GetOrCreateComponentByIdentifier<T>(ComponentIdentifier id) where T : Component
         {
-            var componentGuid = Guid.Parse(id.ComponentId);
-            
+            var componentGuid = Guid.Parse(id.Guid);
+
             if (componentGuid == Guid.Empty)
                 return null;
 
@@ -488,7 +507,7 @@ namespace PLUME.Viewer.Player
                 return _componentByInstanceId.GetValueOrDefault(replayComponentInstanceId.Value) as T;
             }
 
-            var go = GetOrCreateGameObjectByIdentifier(id.ParentId);
+            var go = GetOrCreateGameObjectByIdentifier(id.GameObject);
 
             var component = go.AddComponent<T>();
 
@@ -506,11 +525,26 @@ namespace PLUME.Viewer.Player
             return component;
         }
 
+        public void MoveGameObjectToScene(GameObjectIdentifier id, SceneIdentifier scene)
+        {
+            var go = GetOrCreateGameObjectByIdentifier(id);
+            var targetScene = GetOrCreateSceneByIdentifier(scene);
+            
+            // Sanity check to prevent error
+            if (go.transform.parent != null)
+            {
+                Debug.LogWarning($"Cannot move non-root GameObject {go.name} to scene {scene.Name}");
+                return;
+            }
+            
+            SceneManager.MoveGameObjectToScene(go, targetScene);
+        }
+        
         public bool TryDestroyGameObjectByIdentifier(GameObjectIdentifier id)
         {
-            var gameObjectGuid = Guid.Parse(id.GameObjectId);
-            var transformGuid = Guid.Parse(id.TransformId);
-            
+            var gameObjectGuid = Guid.Parse(id.Guid);
+            var transformGuid = Guid.Parse(id.TransformGuid);
+
             var goReplayInstanceId = GetReplayInstanceId(gameObjectGuid);
             var transformReplayInstanceId = GetReplayInstanceId(transformGuid);
 
@@ -530,7 +564,7 @@ namespace PLUME.Viewer.Player
             if (go != null)
             {
                 updatedHierarchy?.Invoke(new HierarchyDestroyGameObjectEvent(id));
-                
+
                 _gameObjectsByInstanceId.Remove(go.GetInstanceID());
                 _gameObjectsTagByInstanceId.Remove(go.GetInstanceID());
                 _transformsByInstanceId.Remove(go.transform.GetInstanceID());
@@ -556,7 +590,7 @@ namespace PLUME.Viewer.Player
                         RemoveIdentifierCorrespondence(GetRecordIdentifier(childComponentInstanceId));
                     }
                 }
-                
+
                 Object.DestroyImmediate(go);
             }
 
@@ -567,7 +601,7 @@ namespace PLUME.Viewer.Player
 
         public bool TryDestroyComponentByIdentifier(ComponentIdentifier identifier)
         {
-            var guid = Guid.Parse(identifier.ComponentId);
+            var guid = Guid.Parse(identifier.Guid);
             var componentReplayInstanceId = GetReplayInstanceId(guid);
 
             if (componentReplayInstanceId.HasValue)
@@ -626,7 +660,7 @@ namespace PLUME.Viewer.Player
         {
             if (recordIdentifier == Guid.Empty)
                 return false;
-            
+
             return _idMap.TryAdd(recordIdentifier, replayInstanceId) &&
                    _invertIdMap.TryAdd(replayInstanceId, recordIdentifier);
         }
@@ -636,8 +670,8 @@ namespace PLUME.Viewer.Player
             if (recordIdentifier == null || replayAsset == null)
                 return false;
 
-            var guid = Guid.Parse(recordIdentifier.Id);
-            
+            var guid = Guid.Parse(recordIdentifier.Guid);
+
             return _idMap.TryAdd(guid, replayAsset.GetInstanceID()) &&
                    _invertIdMap.TryAdd(replayAsset.GetInstanceID(), guid);
         }
@@ -647,9 +681,5 @@ namespace PLUME.Viewer.Player
             return _active;
         }
 
-        public Scene GetScene()
-        {
-            return _scene;
-        }
     }
 }

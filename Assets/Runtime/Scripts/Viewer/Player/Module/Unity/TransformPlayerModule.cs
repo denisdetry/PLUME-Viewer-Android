@@ -11,27 +11,27 @@ namespace PLUME.Viewer.Player.Module.Unity
             {
                 case TransformCreate transformCreate:
                 {
-                    ctx.GetOrCreateTransformByIdentifier(transformCreate.Id);
+                    ctx.GetOrCreateTransformByIdentifier(transformCreate.Component);
                     break;
                 }
                 case TransformDestroy transformDestroy:
                 {
-                    ctx.TryDestroyGameObjectByIdentifier(transformDestroy.Id.ParentId);
+                    ctx.TryDestroyGameObjectByIdentifier(transformDestroy.Component.GameObject);
                     break;
                 }
                 case TransformUpdate transformUpdate:
                 {
-                    if (transformUpdate.ParentTransformId != null)
+                    if (transformUpdate.ParentTransform != null)
                     {
-                        ctx.SetParent(transformUpdate.Id, transformUpdate.ParentTransformId);
+                        ctx.SetParent(transformUpdate.Component, transformUpdate.ParentTransform);
                     }
 
                     if (transformUpdate.HasSiblingIdx)
                     {
-                        ctx.SetSiblingIndex(transformUpdate.Id, transformUpdate.SiblingIdx);
+                        ctx.SetSiblingIndex(transformUpdate.Component, transformUpdate.SiblingIdx);
                     }
 
-                    var t = ctx.GetOrCreateTransformByIdentifier(transformUpdate.Id);
+                    var t = ctx.GetOrCreateTransformByIdentifier(transformUpdate.Component);
 
                     if (transformUpdate.LocalPosition != null)
                     {
