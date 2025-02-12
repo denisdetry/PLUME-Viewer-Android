@@ -40,14 +40,19 @@ namespace PLUME.Viewer.Player.Module.Unity
 
                     if (gameObjectUpdate.HasTag)
                     {
+                        if (gameObjectUpdate.Tag == "MainCamera")
+                        {
+                            go.tag = "MainCamera";
+                        }
+
                         ctx.SetGameObjectTag(gameObjectUpdate.Id, gameObjectUpdate.Tag);
                     }
-                    
+
                     if (gameObjectUpdate.Scene != null)
                     {
                         ctx.MoveGameObjectToScene(gameObjectUpdate.Id, gameObjectUpdate.Scene);
                     }
-                    
+
                     break;
                 }
             }
