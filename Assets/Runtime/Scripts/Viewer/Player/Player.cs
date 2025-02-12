@@ -6,12 +6,9 @@ using PLUME.Viewer.Analysis;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Serialization;
 using Application = UnityEngine.Application;
-#if UNITY_STANDALONE_WIN
-using Cysharp.Threading.Tasks;
 using System.Windows.Forms;
-#endif
+using Cysharp.Threading.Tasks;
 
 namespace PLUME.Viewer.Player
 {
@@ -20,7 +17,7 @@ namespace PLUME.Viewer.Player
     public class Player : MonoBehaviour, IDisposable
     {
         public static Player Instance { get; private set; }
-        
+
         public TypeRegistryProvider typeRegistryProvider;
 
         public bool loop;
@@ -50,7 +47,7 @@ namespace PLUME.Viewer.Player
         public MainCamera mainCamera;
 
         private PreviewCamera _currentCamera;
-        
+
         public Action<IHierarchyUpdateEvent> mainContextUpdatedHierarchy;
 
         private AnalysisModule _generatingModule;
@@ -110,15 +107,15 @@ namespace PLUME.Viewer.Player
 
             OnFinishLoading += () =>
             {
-                GraphicsSettings.defaultRenderPipeline =
+                var renderPipelineAsset =
                     RecordAssetBundle.GetOrDefaultAssetByIdentifier<RenderPipelineAsset>(Record.graphicsSettings
                         .DefaultRenderPipelineAsset);
+                
+                if (renderPipelineAsset == null)
+                    GraphicsSettings.defaultRenderPipeline = null;
             };
 
-            UniTask.WhenAll(recordLoadTask, assetBundleLoadTask).ContinueWith(() =>
-            {
-                OnFinishLoading();
-            }).Forget();
+            UniTask.WhenAll(recordLoadTask, assetBundleLoadTask).ContinueWith(() => { OnFinishLoading(); }).Forget();
         }
 
         private static string GetRecordPath()
@@ -183,14 +180,6 @@ namespace PLUME.Viewer.Player
                 }
             }
 
-#if UNITY_EDITOR
-            var bundlePath = EditorUtility.OpenFilePanel("Open bundle", Environment.CurrentDirectory, "");
-
-            if (!string.IsNullOrEmpty(bundlePath))
-            {
-                return bundlePath;
-            }
-#elif UNITY_STANDALONE_WIN
             using (var fd = new OpenFileDialog())
             {
                 fd.Title = "Open asset bundle file";
@@ -203,7 +192,6 @@ namespace PLUME.Viewer.Player
                     return fd.FileName;
                 }
             }
-#endif
 
             Application.Quit(127);
             throw new FileNotFoundException("Failed to open bundle file.");
