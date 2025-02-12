@@ -6,8 +6,10 @@ using PLUME.Viewer.Analysis;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Application = UnityEngine.Application;
 #if UNITY_STANDALONE_WIN
 using Cysharp.Threading.Tasks;
+using System.Windows.Forms;
 #endif
 
 namespace PLUME.Viewer.Player
