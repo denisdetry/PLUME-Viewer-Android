@@ -37,8 +37,16 @@ namespace PLUME
             Progress = 0;
 
             _sampleTypeRegistry = sampleTypeRegistry;
-
-            _baseStream = File.Open(recordPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            Debug.Log("DenisPlumeLog - RecordLoader: try open recordPath");
+            try {
+                var pathpath = System.IO.Path.Combine(recordPath, "record_2025-02-25T13-35-01+00.plm");
+                _baseStream = File.Open(pathpath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            } catch (Exception e) {
+                Debug.Log("DenisPlumeLog - RecordLoader: error while loading baseStream: " + e.Message);
+                throw e;
+            }
+            
+            Debug.Log("DenisPlumeLog - RecordLoader: recordPath opened");
 
             if (IsLZ4Compressed(_baseStream))
                 _stream = LZ4Stream.Decode(_baseStream);
@@ -48,25 +56,32 @@ namespace PLUME
 
         public async UniTask<Record> LoadAsync()
         {
+            Debug.Log("DenisPlumeLog - LoadAsync: Begin");
             Status = LoadingStatus.Loading;
             Progress = 0;
 
+            Debug.Log("DenisPlumeLog - LoadAsync: Begin Parse Metadata");
             var packedMetadata = PackedSample.Parser.ParseDelimitedFrom(_stream);
             var metadata = packedMetadata.Payload.Unpack<RecordMetadata>();
-            
-            if(metadata == null)
-                throw new Exception("Failed to load metadata from record file");
+            Debug.Log("DenisPlumeLog - LoadAsync: Finished Parse Metadata");
 
+
+            if(metadata == null)
+                throw new Exception("DenisPlumeLog - LoadAsync: Failed to load metadata from record file");
+
+            Debug.Log("DenisPlumeLog - LoadAsync: Begin Parse Graphic Settings");
             var packedGraphicsSettings = PackedSample.Parser.ParseDelimitedFrom(_stream);
             var graphicsSettings = packedGraphicsSettings.Payload.Unpack<GraphicsSettings>();
+            Debug.Log("DenisPlumeLog - LoadAsync: Finished Parse Graphic Settings");
             
             if(graphicsSettings == null)
-                throw new Exception("Failed to load graphics settings from record file");
+                throw new Exception("DenisPlumeLog - LoadAsync: Failed to load graphics settings from record file");
             
             var record = new Record(metadata, graphicsSettings);
 
             var loadingThread = new Thread(() =>
             {
+                Debug.Log("DenisPlumeLog - LoadAsync: Begin loadingThread");
                 Profiler.BeginThreadProfiling("PLUME", "RecordLoader.LoadAsync");
 
                 while (_baseStream.Position < _baseStream.Length)
@@ -77,6 +92,7 @@ namespace PLUME
                         ulong? timestamp = packedSample.HasTimestamp ? packedSample.Timestamp : null;
                         var payload = packedSample.Payload;
                         var unpackedSample = RawSampleUtils.UnpackAsRawSample(timestamp, payload, _sampleTypeRegistry);
+                        //Debug.Log("DenisPlumeLog - LoadAsync: Sample unpacked");
 
                         switch (unpackedSample)
                         {
@@ -86,6 +102,7 @@ namespace PLUME
                                 record.AddFrame(frameSample);
                                 break;
                             case RawSample<Marker> marker:
+
                                 record.AddMarkerSample(marker);
                                 break;
                             case RawSample<InputAction> inputAction:
@@ -108,11 +125,14 @@ namespace PLUME
                         }
 
                         Progress = _baseStream.Position / (float)_baseStream.Length;
+                        //Debug.Log("\r DenisPlumeLog - LoadAsync: Progress = " + Progress.ToString());
                     }
-                    catch (InvalidProtocolBufferException)
+                    catch (InvalidProtocolBufferException ex)
                     {
+                        Debug.Log("DenisPlumeLog - LoadAsync: InvalidProtocolBufferException: " + ex.Message);
                         break;
                     }
+                   
                 }
 
                 Profiler.EndThreadProfiling();
@@ -131,7 +151,7 @@ namespace PLUME
 
             _stream.Close();
             _stream = null;
-
+             Debug.Log("DenisPlumeLog - Exit LoadAsync");
             return record;
         }
 

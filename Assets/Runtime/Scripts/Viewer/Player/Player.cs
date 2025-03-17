@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Application = UnityEngine.Application;
-using System.Windows.Forms;
+//using System.Windows.Forms;
 using Cysharp.Threading.Tasks;
 
 namespace PLUME.Viewer.Player
@@ -77,9 +77,12 @@ namespace PLUME.Viewer.Player
                 transform.parent = null;
                 DontDestroyOnLoad(gameObject);
             }
-
+            Debug.Log("DenisPlumeLog - Call: GetRecordPath");
             var recordPath = GetRecordPath();
+            Debug.Log("DenisPlumeLog - Exit: GetRecordPath");
+            Debug.Log("DenisPlumeLog - Call: GetBundlePath");
             var bundlePath = GetBundlePath(recordPath);
+            Debug.Log("DenisPlumeLog - Exit: GetBundlePath");
 
             PreviewRenderTexture = RenderTexture.GetTemporary(1920, 1080);
             freeCamera.PreviewRenderTexture = PreviewRenderTexture;
@@ -96,25 +99,40 @@ namespace PLUME.Viewer.Player
 
             var assetBundleLoadTask = _bundleLoader.LoadAsync().ContinueWith(recordAssetBundle =>
             {
+                Debug.Log("DenisPlumeLog - assetBundleLoadTast ContinueWith: create player context");
                 RecordAssetBundle = recordAssetBundle;
                 _mainPlayerContext = PlayerContext.CreatePlayerContext(recordAssetBundle);
                 _mainPlayerContext.updatedHierarchy += mainContextUpdatedHierarchy;
+                Debug.Log("DenisPlumeLog - assetBundleLoadTast ContinueWith: player context created");
             });
 
+            Debug.Log("DenisPlumeLog - Initialize new RecordLoader");
             _recordLoader = new RecordLoader(recordPath, typeRegistryProvider.GetTypeRegistry());
+            Debug.Log("DenisPlumeLog - RecordLoader Initialized");
 
+            Debug.Log("DenisPlumeLog - Call: recordLoadTask LoadAsync");
             var recordLoadTask = _recordLoader.LoadAsync().ContinueWith(record => { Record = record; });
+            Debug.Log("DenisPlumeLog - recordLoadTask initialized");
 
             OnFinishLoading += () =>
             {
-                var renderPipelineAsset =
+                Debug.Log("DenisPlumeLog - Begin RenderPipelineAsset");
+                try {
+                    var renderPipelineAsset =
                     RecordAssetBundle.GetOrDefaultAssetByIdentifier<RenderPipelineAsset>(Record.graphicsSettings
                         .DefaultRenderPipelineAsset);
                 
-                if (renderPipelineAsset == null)
-                    GraphicsSettings.defaultRenderPipeline = null;
-            };
+                    if (renderPipelineAsset == null)
+                        Debug.Log("DenisPlumeLog - renderPipelineAsset is null");
+                        GraphicsSettings.defaultRenderPipeline = null;
 
+                    Debug.Log("DenisPlumeLog - Exit RenderPipelineAsset");
+                } catch (Exception e) {
+                    Debug.Log("DenisPlumeLog - OnFinishloading ln. 117 exception: " + e.Message);
+                }
+                
+            };
+            
             UniTask.WhenAll(recordLoadTask, assetBundleLoadTask).ContinueWith(() => { OnFinishLoading(); }).Forget();
         }
 
@@ -126,14 +144,17 @@ namespace PLUME.Viewer.Player
             if (arguments.Length > 0)
             {
                 var lastArgument = arguments[^1];
-
+                Debug.Log("DenisPlumeLog - GetRecordPath: check if file exists");
                 if (lastArgument.EndsWith(".plm") && File.Exists(lastArgument))
                 {
                     return lastArgument;
                 }
             }
-
-#if UNITY_EDITOR
+            Debug.Log("DenisPlumeLog - GetRecordPath: set file path");
+            var filePath = "/storage/emulated/0/Android/data/com.LIRIS.PLUMEViewer/files/";
+            // record_2025-02-25T13-35-01+00.plm
+            return filePath;
+/* #if UNITY_EDITOR
             var filePath = EditorUtility.OpenFilePanel("Open record file", Application.dataPath, "plm");
 
             if (!string.IsNullOrEmpty(filePath))
@@ -153,10 +174,10 @@ namespace PLUME.Viewer.Player
                     return fd.FileName;
                 }
             }
-#endif
+#endif */
 
             Application.Quit(127);
-            throw new FileNotFoundException("Failed to open record file.");
+            throw new FileNotFoundException("DenisPlumeLog - Failed to open record file.");
         }
 
         private static string GetBundlePath(string recordFilePath = null)
@@ -164,23 +185,31 @@ namespace PLUME.Viewer.Player
             if (recordFilePath != null)
             {
                 // Try to find the asset bundle file from the same directory as the record file
+                Debug.Log("DenisPlumeLog - GetBundlePath: call Path.GetDirectoryName");
                 var recordDirectory = Path.GetDirectoryName(recordFilePath);
+                Debug.Log("DenisPlumeLog - GetBundlePath: exit Path.GetDirectoryName with value " + recordDirectory);
+
 
                 if (recordDirectory == null)
                 {
                     Application.Quit(127);
-                    throw new DirectoryNotFoundException("Failed to find the directory of the record file.");
+                    throw new DirectoryNotFoundException("DenisPlumeLog - Failed to find the directory of the record file.");
                 }
 
                 var path = Path.Combine(recordDirectory, "plume_bundle.zip");
-
+                Debug.Log("DenisPlumeLog - GetBundlePath: check if asset bundle in same directory as record file");
                 if (File.Exists(path))
                 {
+                    Debug.Log("DenisPlumeLog - GetBundlePath: asset bundle in the same directory");
+                    Debug.Log("DenisPlumeLog - GetBundlePath: returning bundle path");
                     return path;
                 }
+
+                Debug.Log("DenisPlumeLog - GetBundlePath: asset bundle NOT in the same directory");
+                return "/storage/emulated/0/Android/data/fr.liris.EasterEggHunt/files/plume_bundle.zip";
             }
 
-            using (var fd = new OpenFileDialog())
+            /* using (var fd = new OpenFileDialog())
             {
                 fd.Title = "Open asset bundle file";
                 fd.Filter = "asset bundle (*.zip)|*.zip";
@@ -191,7 +220,7 @@ namespace PLUME.Viewer.Player
                     //Get the path of specified file
                     return fd.FileName;
                 }
-            }
+            } */
 
             Application.Quit(127);
             throw new FileNotFoundException("Failed to open bundle file.");
